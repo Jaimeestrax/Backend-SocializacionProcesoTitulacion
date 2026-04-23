@@ -1,0 +1,38 @@
+import mongoose from "mongoose";
+
+const instrumentoSchema = new mongoose.Schema({
+    identificador: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    ruta: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    nombre: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    descripcion: {
+        type: String,
+        required: true
+    },
+    id_encargado: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: true
+    },
+    estado: {
+        type: Boolean,
+        required: true
+    }
+}, {
+    timestamps: false,
+    collection: 'instrumentos'
+});
+
+// Exportación del modelo
+export const Instrumento = mongoose.model('Instrumento', instrumentoSchema);

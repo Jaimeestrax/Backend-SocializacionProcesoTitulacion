@@ -1,0 +1,67 @@
+import mongoose from "mongoose";
+
+const usuarioSchema = new mongoose.Schema({
+    nombres: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    apellidos: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    correo: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercas: true, // Evita correos duplicados por mayuscula, minuscula
+        unique: true,
+        match: [/^[a-zA-Z0-9._%+-]+\.[a-zA-Z0-9._%+-]+@espoch\.edu\.ec$/]
+    },
+    usuario: {
+        type: String,
+        required: true,
+        trim: true,
+        unique: true
+    },
+    contrasena: {
+        type: String,
+        required: true,
+        select: false // No se devuelve en las consultas
+    },
+    rol: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Rol',
+        required: true
+    },
+    descripcion: {
+        type: String,
+        required: false
+    },
+    fecha_inicio: {
+        type: Date,
+        required: true
+    },
+    fecha_fin: {
+        type: Date,
+        required: false
+    },
+    estado: {
+        type: Number,
+        required: true
+    }
+}, {
+    timestamps: false,
+    collecion: 'usuarios',
+    // Uso de virtuals -> Campos que no se guardan en bd, pero se pueden usar en consultas
+    toJSON: { virtuals: true }
+});
+
+// Concatenación de nombres y apellidos
+usuarioSchema.virtual('nombreCompleto').get(function () {
+    return `${this.nombres} ${this.apellidos}`;
+});
+
+// Exportación del modelo
+export const Usuario = mongoose.model('Usuario', usuarioSchema);

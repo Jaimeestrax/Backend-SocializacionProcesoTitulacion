@@ -1,0 +1,37 @@
+import mongoose from "mongoose";
+
+const noticiaSchema = new mongoose.Schema({
+    titulo: {
+        type: String,
+        required: true
+    },
+    descripcion: {
+        type: String,
+        required: true
+    },
+    prioridad: {
+        type: String,
+        required: true
+    },
+    subproceso: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subproceso',
+        required: false
+    },
+    imagen: {
+        type: String,
+        required: false,
+        unique: true
+    },
+    id_encargado: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: true
+    }
+}, {
+    timestamps: false,
+    collection: 'noticias'
+});
+
+// Exportación del modelo
+export const Noticia = mongoose.model('Noticia', noticiaSchema);
