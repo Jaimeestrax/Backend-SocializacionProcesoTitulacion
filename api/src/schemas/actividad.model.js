@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const actividadSchema = new mongoose.Schema({
     nombre: {
@@ -32,6 +33,9 @@ const actividadSchema = new mongoose.Schema({
     timestamps: false,
     collection: 'actividades'
 });
+
+// Plugin de paginación
+actividadSchema.plugin(mongoosePaginate);
 
 // Exportación del modelo
 const Actividad = mongoose.model('Actividad', actividadSchema);

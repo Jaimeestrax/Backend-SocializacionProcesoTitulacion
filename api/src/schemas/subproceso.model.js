@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const subprocesoSchema = new mongoose.Schema({
     identificador: {
@@ -36,6 +37,9 @@ const subprocesoSchema = new mongoose.Schema({
     timestamps: false,
     collection: 'subprocesos'
 });
+
+// Plugin de paginación
+subprocesoSchema.plugin(mongoosePaginate);
 
 // Exportación del modelo
 const Subproceso = mongoose.model('Subproceso', subprocesoSchema);

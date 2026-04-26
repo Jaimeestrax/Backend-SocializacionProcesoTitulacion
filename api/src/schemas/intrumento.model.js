@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const instrumentoSchema = new mongoose.Schema({
     identificador: {
@@ -33,6 +34,9 @@ const instrumentoSchema = new mongoose.Schema({
     timestamps: false,
     collection: 'instrumentos'
 });
+
+// Plugin de paginación
+instrumentoSchema.plugin(mongoosePaginate);
 
 // Exportación del modelo
 const Instrumento = mongoose.model('Instrumento', instrumentoSchema);

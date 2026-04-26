@@ -7,7 +7,7 @@ export function generarToken(usuario) {
     const payload = {
         _id: usuario._id,
     }
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5 min' });
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '12 h' });
 }
 
 // Verifica que el token sea valido

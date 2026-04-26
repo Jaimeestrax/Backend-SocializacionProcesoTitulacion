@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const noticiaSchema = new mongoose.Schema({
     titulo: {
@@ -32,6 +33,9 @@ const noticiaSchema = new mongoose.Schema({
     timestamps: false,
     collection: 'noticias'
 });
+
+// Plugin de paginación
+noticiaSchema.plugin(mongoosePaginate);
 
 // Exportación del modelo
 const Noticia = mongoose.model('Noticia', noticiaSchema);

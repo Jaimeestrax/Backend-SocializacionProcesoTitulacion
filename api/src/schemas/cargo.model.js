@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const cargoSchema = new mongoose.Schema({
     nombre_cargo: {
@@ -11,6 +12,9 @@ const cargoSchema = new mongoose.Schema({
     timestamps: false,
     collection: 'cargos'
 });
+
+// Plugin de paginación
+cargoSchema.plugin(mongoosePaginate);
 
 const Cargo = mongoose.model('Cargo', cargoSchema);
 

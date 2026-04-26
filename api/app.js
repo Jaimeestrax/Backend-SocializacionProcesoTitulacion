@@ -6,11 +6,14 @@ import 'dotenv/config'; // Manejo de variables de entorno
 import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
+import logger from './src/middlewares/logger.js';
 import { connectDB } from './src/config/db.js';
 import { crearAdminSiNoExiste } from './src/utils/createAdmin.js';
 
 // Importación de rutas base
 import authRouter from './src/routes/auth.route.js';
+import instrumentoRouter from './src/routes/intrumento.route.js';
+import usuarioRouter from './src/routes/usuario.route.js';
 
 // Conexión a la base de datos
 await connectDB();
@@ -22,6 +25,7 @@ await crearAdminSiNoExiste();
 const app = express();
 
 // Middlewares
+app.use(logger); // Registra las peticiones que recibe la API
 app.use(helmet()); // Seguridad base -> Setea headers http para vulnerabilidades web comunes
 app.use(express.json()); // Convierte el cuerpo de las peticiones a json -> content-type: application/json
 app.use(express.urlencoded({ extended: true }));  // Parsea datos codificados en la URL -> content-type: application/x-www-form-urlencoded
@@ -34,6 +38,8 @@ app.use(
 
 // Ensamble de rutas a exponer
 app.use('/api', authRouter);
+app.use('/api', instrumentoRouter);
+app.use('/api', usuarioRouter);
 
 // Servir archivos estaticos
 app.use('/uploads', express.static(path.resolve('uploads')));

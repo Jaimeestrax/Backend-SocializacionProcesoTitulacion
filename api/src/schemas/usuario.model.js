@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const usuarioSchema = new mongoose.Schema({
     nombres: {
@@ -62,6 +63,9 @@ const usuarioSchema = new mongoose.Schema({
 usuarioSchema.virtual('nombreCompleto').get(function () {
     return `${this.nombres} ${this.apellidos}`;
 });
+
+// Plugin de paginación
+usuarioSchema.plugin(mongoosePaginate);
 
 // Exportación del modelo
 const Usuario = mongoose.model('Usuario', usuarioSchema);

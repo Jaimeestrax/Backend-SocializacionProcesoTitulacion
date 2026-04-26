@@ -23,7 +23,7 @@ export async function ensureAuth(req, res, next) {
         const payload = verificarToken(token);
 
         // 3. Busca el usuario
-        req.user = await Usuario.findById(payload._id);
+        req.user = await Usuario.findById(payload._id); // Quitar contrasñea
 
         if (!req.user) {
             return res.status(401).send({

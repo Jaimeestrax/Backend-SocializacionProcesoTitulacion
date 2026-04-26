@@ -64,6 +64,19 @@ async function registrarUsuario(req, res) {
     }
 }
 
+async function obtenerUsuarioAutenticado(req, res) {
+    try {
+        // Usuario obtenido mediante middleware de auth
+        res.status(200).send({
+            message: 'Usuario obtenido exitosamente',
+            data: req.usuario
+        });
+    } catch (error) {
+        console.log('No se pudo obtener el usuario:', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
 async function obtenerUsuarios(req, res) {
     try {
 
@@ -74,6 +87,7 @@ async function obtenerUsuarios(req, res) {
 
 const UsuarioController = {
     registrarUsuario,
+    obtenerUsuarioAutenticado,
     obtenerUsuarios
 }
 
