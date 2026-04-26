@@ -38,4 +38,6 @@ const subprocesoSchema = new mongoose.Schema({
 });
 
 // Exportación del modelo
-export const Subproceso = mongoose.model('Subproceso', subprocesoSchema);
+const Subproceso = mongoose.model('Subproceso', subprocesoSchema);
+
+export default Subproceso;

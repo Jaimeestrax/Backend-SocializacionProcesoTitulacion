@@ -1,14 +1,14 @@
 import Usuario from "../schemas/usuario.model.js";
 import { hashear } from "../utils/bcrypt.js";
 
-export async function crearUsuario(req, res) {
+async function registrarUsuario(req, res) {
     try {
         const { nombres, apellidos, correo, usuario, contrasena, rol, descripcion, fecha_inicio } = req.body;
 
         // Validación de campos obligatorios
         if (!nombres || !apellidos || !rol || !fecha_inicio) {
             // 400 Bad Request
-            return res.status(400).send({ message: 'No se ha proporcionado toda la información identificativa del usuario' });
+            return res.status(400).send({ message: 'No se ha proporcionado toda la información del usuario' });
         }
 
         // Validación de los datos de la cuenta a crear
@@ -41,10 +41,10 @@ export async function crearUsuario(req, res) {
         await nuevoUsuario.save();
 
         // 201 Created
-        res.status(201).send({ message: 'Usuario creado exitosamente' });
+        res.status(201).send({ message: 'Usuario registrado exitosamente' });
 
     } catch (error) {
-        console.error('No se pudo crear el usuario: ', error.name); // Evita exponer información sensible
+        console.error('No se pudo registrar el usuario: ', error.name); // Evita exponer información sensible
         if (error.name === 'ValidationError') {
             const errores = error.errors;
             // Validación del match del correo
@@ -64,7 +64,7 @@ export async function crearUsuario(req, res) {
     }
 }
 
-export async function obtenerUsuarios(req, res) {
+async function obtenerUsuarios(req, res) {
     try {
 
     } catch (error) {
@@ -72,3 +72,9 @@ export async function obtenerUsuarios(req, res) {
     }
 }
 
+const UsuarioController = {
+    registrarUsuario,
+    obtenerUsuarios
+}
+
+export default UsuarioController;

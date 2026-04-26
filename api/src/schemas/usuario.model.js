@@ -15,7 +15,7 @@ const usuarioSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        lowercas: true, // Evita correos duplicados por mayuscula, minuscula
+        lowercase: true, // Evita correos duplicados por mayuscula, minuscula
         unique: true,
         match: [/^[a-zA-Z0-9._%+-]+\.[a-zA-Z0-9._%+-]+@espoch\.edu\.ec$/]
     },
@@ -30,9 +30,9 @@ const usuarioSchema = new mongoose.Schema({
         required: true,
         select: false // No se devuelve en las consultas
     },
-    rol: {
+    cargo: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Rol',
+        ref: 'Cargo',
         required: true
     },
     descripcion: {
@@ -48,12 +48,12 @@ const usuarioSchema = new mongoose.Schema({
         required: false
     },
     estado: {
-        type: Number,
+        type: Number, // 0: Desactivo, 1: Activo, 2: Eliminado
         required: true
     }
 }, {
     timestamps: false,
-    collecion: 'usuarios',
+    collection: 'usuarios',
     // Uso de virtuals -> Campos que no se guardan en bd, pero se pueden usar en consultas
     toJSON: { virtuals: true }
 });
@@ -64,4 +64,6 @@ usuarioSchema.virtual('nombreCompleto').get(function () {
 });
 
 // Exportación del modelo
-export const Usuario = mongoose.model('Usuario', usuarioSchema);
+const Usuario = mongoose.model('Usuario', usuarioSchema);
+
+export default Usuario;

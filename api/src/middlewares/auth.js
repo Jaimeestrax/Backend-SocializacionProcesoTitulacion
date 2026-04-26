@@ -24,19 +24,14 @@ export async function ensureAuth(req, res, next) {
 
         // 3. Busca el usuario
         req.user = await Usuario.findById(payload._id);
+
         if (!req.user) {
             return res.status(401).send({
                 message: "Acceso denegado. Usuario no encontrado."
             });
         }
 
-        // 4. Verifica la expiración
-        if (payload.exp < Date.now() / 1000) {
-            // Esta en milisegundos
-            return res.status(401).send({ message: "El token ha expirado. Inicia sesión nuevamente" });
-        }
-
-        // 5. Continúa con la petición
+        // 4. Continúa con la petición
         next();
 
     } catch (error) {

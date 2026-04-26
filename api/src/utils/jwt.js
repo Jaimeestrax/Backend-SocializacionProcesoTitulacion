@@ -3,7 +3,10 @@
 import jwt from "jsonwebtoken";
 
 // Genera un token de acceso
-export function generarToken(payload) {
+export function generarToken(usuario) {
+    const payload = {
+        _id: usuario._id,
+    }
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5 min' });
 }
 

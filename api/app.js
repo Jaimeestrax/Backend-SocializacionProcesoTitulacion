@@ -25,12 +25,18 @@ const app = express();
 app.use(helmet()); // Seguridad base -> Setea headers http para vulnerabilidades web comunes
 app.use(express.json()); // Convierte el cuerpo de las peticiones a json -> content-type: application/json
 app.use(express.urlencoded({ extended: true }));  // Parsea datos codificados en la URL -> content-type: application/x-www-form-urlencoded
+// Configuracion de CORS
+app.use(
+    cors({
+        origin: ["http://localhost:3000"]
+    })
+);
 
 // Ensamble de rutas a exponer
 app.use('/api', authRouter);
 
 // Servir archivos estaticos
-app.use('/uploads/fotos', express.static(path.resolve('uploads/fotos')));
+app.use('/uploads', express.static(path.resolve('uploads')));
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {

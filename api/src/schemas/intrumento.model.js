@@ -35,4 +35,6 @@ const instrumentoSchema = new mongoose.Schema({
 });
 
 // Exportación del modelo
-export const Instrumento = mongoose.model('Instrumento', instrumentoSchema);
+const Instrumento = mongoose.model('Instrumento', instrumentoSchema);
+
+export default Instrumento;

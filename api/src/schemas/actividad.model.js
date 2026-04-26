@@ -34,4 +34,6 @@ const actividadSchema = new mongoose.Schema({
 });
 
 // Exportación del modelo
-export const Actividad = mongoose.model('Actividad', actividadSchema);
+const Actividad = mongoose.model('Actividad', actividadSchema);
+
+export default Actividad;

@@ -25,12 +25,17 @@ async function login(req, res) {
         }
 
         // Generación de token
-        const token = generarToken(usuarioEncontrado._id);
+        const token = generarToken(usuarioEncontrado);
+
+        const { contrasena: _, ...publicUser } = usuarioEncontrado.toObject();
 
         // 200 OK
         res.status(200).send({
             message: 'Inicio de sesión exitoso',
-            token
+            data: {
+                publicUser,
+                token
+            }
         });
 
     } catch (error) {
@@ -40,4 +45,8 @@ async function login(req, res) {
 }
 
 // Exporta una unica entidad principal
+const AuthController = {
+    login
+};
+
 export default AuthController;
