@@ -10,5 +10,6 @@ instrumentoRouter.post('/obtener-instrumentos', ensureAuth, InstrumentoControlle
 instrumentoRouter.get('/obtener-instrumento-por-id/:id', ensureAuth, InstrumentoController.obtenerInstrumentoPorId);
 instrumentoRouter.put('/actualizar-instrumento/:id', ensureAuth, upload('instrumentos').single('archivo'), InstrumentoController.actualizarInstrumento);
 instrumentoRouter.patch('/actualizar-estado-instrumento/:id', ensureAuth, InstrumentoController.actualizarEstadoInstrumento);
+instrumentoRouter.get('/listar-instrumentos', ensureAuth, InstrumentoController.listarInstrumentos);
 
 export default instrumentoRouter;

@@ -32,7 +32,15 @@ const subprocesoSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Actividad',
         required: true
-    }]
+    }],
+    fecha_creacion: {
+        type: Date,
+        default: Date.now
+    },
+    fecha_actualizacion: {
+        type: Date,
+        default: Date.now
+    }
 }, {
     timestamps: false,
     collection: 'subprocesos'

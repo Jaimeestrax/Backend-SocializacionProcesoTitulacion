@@ -9,11 +9,11 @@ const actividadSchema = new mongoose.Schema({
     },
     descripcion: {
         type: String,
-        required: false
+        required: true
     },
-    encargado: {
+    id_cargo: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Encargado',
+        ref: 'Cargo',
         required: false
     },
     fecha_inicio: {
@@ -24,11 +24,11 @@ const actividadSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    intrumento: {
+    instrumentos: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Instrumento',
         required: false
-    }
+    }]
 }, {
     timestamps: false,
     collection: 'actividades'

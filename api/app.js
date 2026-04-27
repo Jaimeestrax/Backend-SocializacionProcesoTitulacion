@@ -14,6 +14,8 @@ import { crearAdminSiNoExiste } from './src/utils/createAdmin.js';
 import authRouter from './src/routes/auth.route.js';
 import instrumentoRouter from './src/routes/intrumento.route.js';
 import usuarioRouter from './src/routes/usuario.route.js';
+import subprocesoRouter from './src/routes/subproceso.route.js';
+import cargoRouter from './src/routes/cargo.route.js';
 
 // Conexión a la base de datos
 await connectDB();
@@ -40,6 +42,8 @@ app.use(
 app.use('/api', authRouter);
 app.use('/api', instrumentoRouter);
 app.use('/api', usuarioRouter);
+app.use('/api', subprocesoRouter);
+app.use('/api', cargoRouter);
 
 // Servir archivos estaticos
 app.use('/uploads', express.static(path.resolve('uploads')));

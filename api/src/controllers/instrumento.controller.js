@@ -130,12 +130,29 @@ async function actualizarEstadoInstrumento(req, res) {
     }
 }
 
+async function listarInstrumentos(req, res) {
+    try {
+        const instrumentosEncontrados = await Instrumento.find({ estado: true });
+        if (!instrumentosEncontrados) {
+            return res.status(404).send({ message: 'No se encontraron instrumentos' });
+        }
+        res.status(200).send({
+            message: 'Instrumentos obtenidos exitosamente',
+            data: instrumentosEncontrados
+        });
+    } catch (error) {
+        console.error('Error al listar instrumentos', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
 const InstrumentoController = {
     registrarInstrumento,
     obtenerInstrumentos,
     obtenerInstrumentoPorId,
     actualizarInstrumento,
-    actualizarEstadoInstrumento
+    actualizarEstadoInstrumento,
+    listarInstrumentos
 }
 
 export default InstrumentoController;
