@@ -13,7 +13,10 @@ async function registrarInstrumento(req, res) {
     try {
         const { identificador, nombre, descripcion, id_encargado } = req.body;
 
-        if (!identificador || !nombre || !descripcion || !id_encargado) {
+        if (!identificador || !nombre || !id_encargado) {
+            if (req.file) {
+                eliminarArchivoFisico(req.file.path);
+            }
             return res.status(400).send({ message: 'No se ha proporcionado toda la información del instrumento' });
         }
 
@@ -49,19 +52,23 @@ async function registrarInstrumento(req, res) {
 async function obtenerInstrumentos(req, res) {
     try {
         const options = {
-            page: req.body.page || 1,
-            limit: req.body.limit || 10
+            page: req.body.pagina || 1,
+            limit: req.body.limite || 10,
+            populate: {
+                path: 'id_encargado',
+                select: 'nombres apellidos' // Campos de usuario
+            }
         };
 
-        const instrumentos = await Instrumento.paginate({}, options);
+        const instrumentosEncontrados = await Instrumento.paginate({ estado: true }, options);
 
-        if (instrumentos.length === 0) {
+        if (instrumentosEncontrados.docs.length === 0) {
             return res.status(404).send({ message: 'No se encontraron instrumentos' });
         }
 
         res.status(200).send({
             message: 'Instrumentos obtenidos exitosamente',
-            data: instrumentos
+            data: instrumentosEncontrados
         });
 
     } catch (error) {
@@ -70,9 +77,65 @@ async function obtenerInstrumentos(req, res) {
     }
 }
 
+async function obtenerInstrumentoPorId(req, res) {
+    try {
+        const { id } = req.params; // Obtenemos el id desde url
+        const instrumentoEncontrado = await Instrumento.findById(id);
+        res.status(200).send({
+            message: 'Instrumento obtenido exitosamente',
+            data: instrumentoEncontrado
+        });
+    } catch (error) {
+        console.error('No se pudo obtener el instrumento', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
+async function actualizarInstrumento(req, res) {
+    try {
+        const { id } = req.params;
+
+        const datosActualizar = { ...req.body };
+
+        // Solo actualiza la ruta si se subió un nuevo archivo
+        if (req.file) {
+            datosActualizar.ruta = req.file.path;
+        }
+
+        const instrumentoActualizado = await Instrumento.findByIdAndUpdate(id, datosActualizar, { new: true });
+        // new: true, devuelve el documento actualizado
+        res.status(200).send({
+            message: 'Instrumento actualizado exitosamente',
+            data: instrumentoActualizado
+        });
+    } catch (error) {
+        console.error('No se pudo actualizar el instrumento', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
+async function actualizarEstadoInstrumento(req, res) {
+    try {
+        const { id } = req.params;
+        const { estado } = req.body;
+        const instrumentoActualizado = await Instrumento.findByIdAndUpdate(id, { estado }, { new: true });
+
+        res.status(200).send({
+            message: 'Estado del instrumento actualizado exitosamente',
+            data: instrumentoActualizado
+        });
+    } catch (error) {
+        console.error('No se pudo actualizar el estado del instrumento', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
 const InstrumentoController = {
     registrarInstrumento,
-    obtenerInstrumentos
+    obtenerInstrumentos,
+    obtenerInstrumentoPorId,
+    actualizarInstrumento,
+    actualizarEstadoInstrumento
 }
 
 export default InstrumentoController;

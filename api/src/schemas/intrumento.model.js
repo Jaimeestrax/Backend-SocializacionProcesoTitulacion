@@ -19,7 +19,7 @@ const instrumentoSchema = new mongoose.Schema({
     },
     descripcion: {
         type: String,
-        required: true
+        required: false
     },
     id_encargado: {
         type: mongoose.Schema.Types.ObjectId,
