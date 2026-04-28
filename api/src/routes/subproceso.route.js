@@ -8,6 +8,10 @@ subprocesoRouter.post('/registrar-subproceso', ensureAuth, SubprocesoController.
 subprocesoRouter.post('/obtener-subprocesos', ensureAuth, SubprocesoController.obtenerSubprocesos);
 subprocesoRouter.put('/actualizar-subproceso/:id', ensureAuth, SubprocesoController.actualizarSubproceso);
 subprocesoRouter.patch('/actualizar-estado-subproceso/:id', ensureAuth, SubprocesoController.actualizarEstadoSubproceso);
-subprocesoRouter.get('/obtener-subproceso-por-id/:id', ensureAuth, SubprocesoController.obtenerSubprocesoPorId);
+// Rutas publicas
+subprocesoRouter.get('/obtener-subproceso-por-id/:id', SubprocesoController.obtenerSubprocesoPorId);
+subprocesoRouter.get('/obtener-subprocesos-proximos', SubprocesoController.obtenerSubprocesosProximos);
+subprocesoRouter.get('/obtener-subproceso-actual', SubprocesoController.obtenerSubprocesoActual);
+subprocesoRouter.get('/obtener-porcentaje-avance', SubprocesoController.obtenerPorcentajeAvance);
 
 export default subprocesoRouter;

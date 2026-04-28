@@ -7,6 +7,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
 import logger from './src/middlewares/logger.js';
+import cookieParser from 'cookie-parser';
 import { connectDB } from './src/config/db.js';
 import { crearAdminSiNoExiste } from './src/utils/createAdmin.js';
 
@@ -31,10 +32,12 @@ app.use(logger); // Registra las peticiones que recibe la API
 app.use(helmet()); // Seguridad base -> Setea headers http para vulnerabilidades web comunes
 app.use(express.json()); // Convierte el cuerpo de las peticiones a json -> content-type: application/json
 app.use(express.urlencoded({ extended: true }));  // Parsea datos codificados en la URL -> content-type: application/x-www-form-urlencoded
+app.use(cookieParser());
 // Configuracion de CORS
 app.use(
     cors({
-        origin: ["http://localhost:3000"]
+        origin: ["http://localhost:3000"],
+        credentials: true
     })
 );
 

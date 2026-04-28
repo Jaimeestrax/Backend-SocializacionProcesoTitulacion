@@ -7,10 +7,25 @@ export function generarToken(usuario) {
     const payload = {
         _id: usuario._id,
     }
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '12 h' });
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '25 min' });
 }
 
 // Verifica que el token sea valido
 export function verificarToken(token) {
     return jwt.verify(token, process.env.JWT_SECRET);
+}
+
+// Cookie de sesión
+export function setAuthCookie(res, token) {
+    res.cookie('token', token, {
+        httpOnly: true, // Solo accesible por el servidor
+        secure: false, // (true) Solo se puede acceder a la cookie por https
+        sameSite: 'lax', // Permite enviar cookie en peticiones cross-site
+        maxAge: 25 * 60 * 1000 // 25 minutos en milisegundo
+    });
+}
+
+// Elimina la cookie de sesión
+export function clearAuthCookie(res) {
+    res.clearCookie('token');
 }

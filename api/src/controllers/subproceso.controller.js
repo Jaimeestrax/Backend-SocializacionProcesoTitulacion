@@ -92,10 +92,11 @@ async function obtenerSubprocesos(req, res) {
 async function actualizarSubproceso(req, res) {
     try {
         const { id } = req.params;
-        const { nombre, descripcion, actividades } = req.body;
+        const { identificador, nombre, descripcion, actividades } = req.body;
 
         const datosActualizar = {};
         // Metadata subproceso
+        if (identificador) datosActualizar.identificador = identificador;
         if (nombre) datosActualizar.nombre = nombre;
         if (descripcion) datosActualizar.descripcion = descripcion;
 
@@ -192,12 +193,141 @@ async function obtenerSubprocesoPorId(req, res) {
     }
 }
 
+async function obtenerSubprocesoActual(req, res) {
+    try {
+        // En base a la fecha actual
+        const hoy = new Date();
+
+        // Normalizamos la fecha para que sea el inicio del dia
+        hoy.setHours(0, 0, 0, 0);
+
+        // Buscar subprocesos donde la fecha actual este dentro de su rango
+        const subprocesoActual = await Subproceso.findOne({
+            estado: true,
+            fecha_inicio: { $lte: hoy }, // lte -> lower than or equal
+            fecha_fin: { $gte: hoy } // gte -> greater than or equal
+        })
+            .sort({ fecha_inicio: -1 }) // Ordena de mayor a menor -> mas reciente al inicio
+            .populate({
+                path: 'actividades',
+                populate: [
+                    { path: 'id_cargo', select: 'nombre' },
+                    { path: 'instrumentos', select: 'identificador nombre ruta' }
+                ]
+            });
+
+        if (!subprocesoActual) {
+            return res.status(404).send({ message: 'No hay subproceso activo para la fecha actual' });
+        }
+
+        res.status(200).send({
+            message: 'Subproceso actual obtenido exitosamente',
+            data: subprocesoActual
+        });
+
+    } catch (error) {
+        console.error('No se pudo obtener el subproceso actual', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
+async function obtenerSubprocesosProximos(req, res) {
+    try {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0); // normalizar
+
+        const subProcesosEncontrados = await Subproceso.find({
+            estado: true,
+            fecha_inicio: { $gt: hoy } // fecha inicio > hoy
+        })
+            .sort({ fecha_inicio: 1 }) //Ordenamos del más próximo al más lejano
+            .populate({
+                path: 'actividades',
+                populate: [
+                    { path: 'id_cargo', select: 'nombre' },
+                    { path: 'instrumentos', select: 'identificador nombre ruta' }
+                ]
+            });
+
+        if (!subProcesosEncontrados || subProcesosEncontrados.length === 0) {
+            return res.status(404).send({ message: 'No hay subprocesos próximos' });
+        }
+
+        res.status(200).send({
+            message: 'Subprocesos próximos obtenidos exitosamente',
+            data: subProcesosEncontrados
+        });
+
+    } catch (error) {
+        console.error('Error al obtener subprocesos próximos', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
+async function obtenerPorcentajeAvance(req, res) {
+    try {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        let porcentaje = 0;
+
+        // Obtenemos los subprocesos activos
+        const subprocesos = await Subproceso.find(
+            { estado: true },
+            { _id: 1 }
+        );
+
+        if (!subprocesos || subprocesos.length === 0) {
+            return res.status(200).send({
+                message: 'No hay subprocesos activos',
+                data: porcentaje
+            });
+        }
+
+        // Mapeamos los ids
+        const subprocesosIds = subprocesos.map(sp => sp._id);
+
+        // Obtenemos total de actividades de esos subprocesos
+        const totalActividades = await Actividad.countDocuments({
+            _id: { $in: subprocesosIds.length ? await Subproceso.distinct("actividades", { _id: { $in: subprocesosIds } }) : [] }
+        });
+
+        if (totalActividades === 0) {
+            return res.status(200).send({
+                message: 'No hay actividades registradas',
+                data: porcentaje
+            });
+        }
+
+        // Obtenemos actividades finalizadas
+        const actividadesFinalizadas = await Actividad.countDocuments({
+            _id: {
+                $in: await Subproceso.distinct("actividades", { _id: { $in: subprocesosIds } })
+            },
+            fecha_fin: { $lt: hoy }
+        });
+
+        porcentaje = (actividadesFinalizadas / totalActividades) * 100;
+
+        res.status(200).send({
+            message: 'Progeso del proceso calculado exitosamente',
+            data: Number(porcentaje.toFixed(2)) // Redondear a dos decimales
+        });
+
+    } catch (error) {
+        console.error('Error al calcular avance por actividades', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
 const SubprocesoController = {
     registrarSubproceso,
     obtenerSubprocesos,
     actualizarSubproceso,
     actualizarEstadoSubproceso,
-    obtenerSubprocesoPorId
+    obtenerSubprocesoPorId,
+    obtenerSubprocesoActual,
+    obtenerSubprocesosProximos,
+    obtenerPorcentajeAvance
 }
 
 export default SubprocesoController;

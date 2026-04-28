@@ -6,11 +6,16 @@ import { verificarToken } from "../utils/jwt.js";
 export async function ensureAuth(req, res, next) {
     let token;
 
-    // 1. Intenta obtener el token del header Authorization
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer")) {
-        // Auth: Bearer <token>  -> [Bearer, <token>]
-        token = authHeader.split(" ")[1];
+    // 1. Intenta obtener token desde cookies
+    if (req.cookies && req.cookies.token) {
+        token = req.cookies.token;
+    } else {
+        // 2. Intenta obtener el token del header Authorization
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith("Bearer")) {
+            // Auth: Bearer <token>  -> [Bearer, <token>]
+            token = authHeader.split(" ")[1];
+        }
     }
 
     if (!token) {
@@ -19,11 +24,11 @@ export async function ensureAuth(req, res, next) {
     }
 
     try {
-        // 2. Decodifica el token
+        // 3. Decodifica el token
         const payload = verificarToken(token);
 
-        // 3. Busca el usuario
-        req.user = await Usuario.findById(payload._id); // Quitar contrasñea
+        // 4. Busca el usuario
+        req.user = await Usuario.findById(payload._id);
 
         if (!req.user) {
             return res.status(401).send({

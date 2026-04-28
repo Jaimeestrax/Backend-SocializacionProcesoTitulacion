@@ -1,6 +1,6 @@
 import Usuario from "../schemas/usuario.model.js";
 import { compararHash } from "../utils/bcrypt.js";
-import { generarToken } from "../utils/jwt.js";
+import { generarToken, setAuthCookie, clearAuthCookie } from "../utils/jwt.js";
 
 async function login(req, res) {
     try {
@@ -27,15 +27,16 @@ async function login(req, res) {
         // Generación de token
         const token = generarToken(usuarioEncontrado);
 
+        // Cookie de sesión
+        setAuthCookie(res, token);
+
+        // Si queremos eliminar un campo de la respuesta -> key: _
         const { contrasena: _, ...publicUser } = usuarioEncontrado.toObject();
 
         // 200 OK
         res.status(200).send({
             message: 'Inicio de sesión exitoso',
-            data: {
-                publicUser,
-                token
-            }
+            data: publicUser
         });
 
     } catch (error) {
@@ -44,9 +45,20 @@ async function login(req, res) {
     }
 }
 
+async function logout(req, res) {
+    try {
+        clearAuthCookie(res);
+        res.status(200).send({ message: 'Cierre de sesión exitoso' });
+    } catch (error) {
+        console.error('No se pudo cerrar sesión: ', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
 // Exporta una unica entidad principal
 const AuthController = {
-    login
+    login,
+    logout
 };
 
 export default AuthController;

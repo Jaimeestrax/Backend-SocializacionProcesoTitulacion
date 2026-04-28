@@ -2,8 +2,6 @@ import mongoose from "mongoose";
 
 export const connectDB = async () => {
     try {
-        // Protección contra NoSQL Injection
-        mongoose.set('sanitizeFilter', true); // Evita operadores peligrosos como $gt, $ne, etc.
         // Conexión a la base de datos
         await mongoose.connect(process.env.MONGO_URI);
         console.log('Conexión exitosa a la base de datos');
