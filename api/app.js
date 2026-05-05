@@ -9,7 +9,7 @@ import path from 'path';
 import logger from './src/middlewares/logger.js';
 import cookieParser from 'cookie-parser';
 import { connectDB } from './src/config/db.js';
-import { crearAdminSiNoExiste } from './src/utils/createAdmin.js';
+import { seedInicial } from './src/utils/createAdmin.js';
 
 // Importación de rutas base
 import authRouter from './src/routes/auth.route.js';
@@ -17,12 +17,13 @@ import instrumentoRouter from './src/routes/intrumento.route.js';
 import usuarioRouter from './src/routes/usuario.route.js';
 import subprocesoRouter from './src/routes/subproceso.route.js';
 import cargoRouter from './src/routes/cargo.route.js';
+import rolRouter from './src/routes/rol.route.js';
 
 // Conexión a la base de datos
 await connectDB();
 
 // Crear admin si no existe
-await crearAdminSiNoExiste();
+await seedInicial();
 
 // Instancia de express
 const app = express();
@@ -32,7 +33,8 @@ app.use(logger); // Registra las peticiones que recibe la API
 app.use(helmet()); // Seguridad base -> Setea headers http para vulnerabilidades web comunes
 app.use(express.json()); // Convierte el cuerpo de las peticiones a json -> content-type: application/json
 app.use(express.urlencoded({ extended: true }));  // Parsea datos codificados en la URL -> content-type: application/x-www-form-urlencoded
-app.use(cookieParser());
+app.use(cookieParser()); // Manejo de cookies
+
 // Configuracion de CORS
 app.use(
     cors({
@@ -47,6 +49,7 @@ app.use('/api', instrumentoRouter);
 app.use('/api', usuarioRouter);
 app.use('/api', subprocesoRouter);
 app.use('/api', cargoRouter);
+app.use('/api', rolRouter);
 
 // Servir archivos estaticos
 app.use('/uploads', express.static(path.resolve('uploads')));

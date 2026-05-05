@@ -24,13 +24,14 @@ const noticiaSchema = new mongoose.Schema({
         required: false,
         unique: true
     },
-    id_encargado: {
+    idEncargado: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Usuario',
         required: true
     }
 }, {
     timestamps: false,
+    versionKey: false,
     collection: 'noticias'
 });
 

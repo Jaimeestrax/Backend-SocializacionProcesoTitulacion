@@ -7,7 +7,7 @@ export function generarToken(usuario) {
     const payload = {
         _id: usuario._id,
     }
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '25 min' });
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '12 h' });
 }
 
 // Verifica que el token sea valido
@@ -21,7 +21,7 @@ export function setAuthCookie(res, token) {
         httpOnly: true, // Solo accesible por el servidor
         secure: false, // (true) Solo se puede acceder a la cookie por https
         sameSite: 'lax', // Permite enviar cookie en peticiones cross-site
-        maxAge: 25 * 60 * 1000 // 25 minutos en milisegundo
+        maxAge: 12 * 60 * 60 * 1000 // 12 horas en milisegundos
     });
 }
 

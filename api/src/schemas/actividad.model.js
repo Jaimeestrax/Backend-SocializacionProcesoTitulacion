@@ -11,26 +11,41 @@ const actividadSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    id_cargo: {
+    idEncargado: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Cargo',
         required: false
     },
-    fecha_inicio: {
-        type: Date,
-        required: true
-    },
-    fecha_fin: {
-        type: Date,
+    orden: {
+        type: Number,
         required: true
     },
     instrumentos: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Instrumento',
         required: false
-    }]
+    }],
+    fechaRegistro: {
+        type: Date,
+        required: true
+    },
+    fechaActualizacion: {
+        type: Date,
+        required: true
+    },
+    generadoPor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: true
+    },
+    actualizadoPor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: false
+    }
 }, {
     timestamps: false,
+    versionKey: false,
     collection: 'actividades'
 });
 

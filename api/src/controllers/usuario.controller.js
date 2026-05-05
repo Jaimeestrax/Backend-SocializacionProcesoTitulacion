@@ -1,12 +1,13 @@
 import Usuario from "../schemas/usuario.model.js";
 import { hashear } from "../utils/bcrypt.js";
+import eliminarArchivoFisico from "../utils/eliminarArchivo.js";
 
 async function registrarUsuario(req, res) {
     try {
-        const { nombres, apellidos, correo, usuario, contrasena, rol, descripcion, fecha_inicio } = req.body;
+        const { nombres, apellidos, correo, usuario, contrasena, idRol, idCargo } = req.body;
 
         // Validación de campos obligatorios
-        if (!nombres || !apellidos || !rol || !fecha_inicio) {
+        if (!nombres || !apellidos || !idRol || !idCargo) {
             // 400 Bad Request
             return res.status(400).send({ message: 'No se ha proporcionado toda la información del usuario' });
         }
@@ -32,9 +33,8 @@ async function registrarUsuario(req, res) {
             correo,
             usuario,
             contrasena: contrasenaHasheada,
-            rol,
-            descripcion,
-            fecha_inicio
+            idRol,
+            idCargo
         });
 
         // Guardar nuevo usuario en la base de datos
@@ -69,7 +69,7 @@ async function obtenerUsuarioAutenticado(req, res) {
         // Usuario obtenido mediante middleware de auth
         res.status(200).send({
             message: 'Usuario obtenido exitosamente',
-            data: req.usuario
+            data: req.user
         });
     } catch (error) {
         console.log('No se pudo obtener el usuario:', error.name);
@@ -79,16 +79,114 @@ async function obtenerUsuarioAutenticado(req, res) {
 
 async function obtenerUsuarios(req, res) {
     try {
+        const options = {
+            page: req.body.pagina || 1,
+            limit: req.body.limite || 10,
+            populate: [
+                { path: 'idRol', select: 'nombre' },
+                { path: 'idCargo', select: 'nombre' }
+            ]
+        };
 
+        const usuariosEncontrados = await Usuario.paginate({ estado: { $ne: 2 } }, options);
+
+        if (usuariosEncontrados.docs.length === 0) {
+            return res.status(404).send({ message: 'No se encontraron usuarios' });
+        }
+
+        res.status(200).send({
+            message: 'Usuarios obtenidos exitosamente',
+            data: usuariosEncontrados
+        });
     } catch (error) {
+        console.log('No se pudo obtener el usuario:', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
 
+async function actualizarUsuario(req, res) {
+    try {
+        const { id } = req.params;
+
+        const datosActualizar = { ...req.body };
+
+        // Solo se actualiza la contraseña si se recibe una nueva contraseña
+        if (datosActualizar.contrasena) {
+            if (datosActualizar.contrasena.length < 14) {
+                return res.status(400).send({ message: 'La contraseña debe tener al menos 14 caracteres' });
+            }
+            const contrasenaHasheada = await hashear(datosActualizar.contrasena);
+            datosActualizar.contrasena = contrasenaHasheada;
+        }
+
+        if (req.file) {
+            datosActualizar.foto = req.file.path;
+        }
+
+        const usuarioActualizado = await Usuario.findByIdAndUpdate(id, datosActualizar, { new: true });
+
+        if (usuarioActualizado) {
+            res.status(200).send({ message: 'Usuario actualizado exitosamente' });
+        } else {
+            if (req.file) {
+                eliminarArchivoFisico(req.file.path);
+            }
+            res.status(404).send({ message: 'No se ha podido actualizar el usuario' });
+        }
+    } catch (error) {
+        console.error('No se pudo actualizar el usuario:', error.name);
+        if (req.file) {
+            eliminarArchivoFisico(req.file.path);
+        }
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
+async function actualizarEstadoUsuario(req, res) {
+    try {
+        const { id } = req.params;
+        const { estado } = req.body;
+
+        if (!id || estado == null) {
+            return res.status(400).send({ message: 'No se ha proporcionado el estado' });
+        }
+
+        // Actualizar estado del usuario
+        const usuarioActualizado = await Usuario.findByIdAndUpdate(id, { estado }, { new: true });
+
+        if (usuarioActualizado) {
+            res.status(200).send({ message: 'Estado del usuario actualizado exitosamente' });
+        } else {
+            res.status(404).send({ message: 'No se ha podido actualizar el estado del usuario' });
+        }
+    } catch (error) {
+        console.error('No se pudo actualizar el estado del usuario:', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
+async function obtenerUsuarioPorId(req, res) {
+    try {
+        const { id } = req.params;
+        const usuarioEncontrado = await Usuario.findById(id);
+        if (usuarioEncontrado) {
+            res.status(200).send({ message: 'Usuario obtenido exitosamente', data: usuarioEncontrado });
+        } else {
+            res.status(404).send({ message: 'No se ha podido obtener el usuario' });
+        }
+    } catch (error) {
+        console.error('No se pudo obtener el usuario:', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
     }
 }
 
 const UsuarioController = {
     registrarUsuario,
     obtenerUsuarioAutenticado,
-    obtenerUsuarios
+    obtenerUsuarios,
+    actualizarUsuario,
+    actualizarEstadoUsuario,
+    obtenerUsuarioPorId
 }
 
 export default UsuarioController;

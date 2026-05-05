@@ -1,12 +1,5 @@
 import Instrumento from "../schemas/intrumento.model.js";
-import fs from 'node:fs';
-
-// Helper para eliminación de archivos
-const eliminarArchivoFisico = (ruta) => {
-    if (ruta) {
-        fs.unlinkSync(ruta);
-    }
-}
+import eliminarArchivoFisico from "../utils/eliminarArchivo.js";
 
 // Registro de instrumentos
 async function registrarInstrumento(req, res) {
@@ -103,13 +96,20 @@ async function actualizarInstrumento(req, res) {
         }
 
         const instrumentoActualizado = await Instrumento.findByIdAndUpdate(id, datosActualizar, { new: true });
-        // new: true, devuelve el documento actualizado
-        res.status(200).send({
-            message: 'Instrumento actualizado exitosamente',
-            data: instrumentoActualizado
-        });
+        // new: true, devuelve el documento actualizad
+        if (instrumentoActualizado) {
+            res.status(200).send({ message: 'Instrumento actualizado exitosamente' });
+        } else {
+            if (req.file) {
+                eliminarArchivoFisico(req.file.path);
+            }
+            res.status(404).send({ message: 'No se ha podido actualizar el instrumento' });
+        }
     } catch (error) {
         console.error('No se pudo actualizar el instrumento', error.name);
+        if (req.file) {
+            eliminarArchivoFisico(req.file.path);
+        }
         res.status(500).send({ message: 'Error interno del servidor' });
     }
 }

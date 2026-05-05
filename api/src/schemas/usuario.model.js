@@ -31,7 +31,16 @@ const usuarioSchema = new mongoose.Schema({
         required: true,
         select: false // No se devuelve en las consultas
     },
-    cargo: {
+    foto: {
+        type: String,
+        required: false
+    },
+    idRol: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Rol',
+        required: true
+    },
+    idCargo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Cargo',
         required: true
@@ -40,11 +49,12 @@ const usuarioSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    fecha_inicio: {
+    fechaInicio: {
         type: Date,
-        required: true
+        required: true,
+        default: Date.now
     },
-    fecha_fin: {
+    fechaFin: {
         type: Date,
         required: false
     },
@@ -54,6 +64,7 @@ const usuarioSchema = new mongoose.Schema({
     }
 }, {
     timestamps: false,
+    versionKey: false,
     collection: 'usuarios',
     // Uso de virtuals -> Campos que no se guardan en bd, pero se pueden usar en consultas
     toJSON: { virtuals: true }

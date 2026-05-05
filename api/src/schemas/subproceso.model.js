@@ -16,33 +16,45 @@ const subprocesoSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    estado: {
-        type: Boolean,
+    orden: {
+        type: Number,
         required: true
     },
-    fecha_inicio: {
+    fechaInicio: {
         type: Date,
-        required: true
+        required: false
     },
-    fecha_fin: {
+    fechaFin: {
         type: Date,
-        required: true
+        required: false
     },
     actividades: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Actividad',
         required: true
     }],
-    fecha_creacion: {
+    fechaRegistro: {
         type: Date,
+        required: true,
         default: Date.now
     },
-    fecha_actualizacion: {
+    fechaActualizacion: {
         type: Date,
-        default: Date.now
+        required: false
+    },
+    generadoPor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: true
+    },
+    actualizadoPor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: false
     }
 }, {
     timestamps: false,
+    versionKey: false,
     collection: 'subprocesos'
 });
 
