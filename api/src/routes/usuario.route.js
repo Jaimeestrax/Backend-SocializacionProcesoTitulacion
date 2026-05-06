@@ -9,7 +9,7 @@ usuarioRouter.post('/registrar-usuario', ensureAuth, UsuarioController.registrar
 usuarioRouter.get('/obtener-usuario-autenticado', ensureAuth, UsuarioController.obtenerUsuarioAutenticado);
 usuarioRouter.post('/obtener-usuarios', ensureAuth, UsuarioController.obtenerUsuarios);
 usuarioRouter.get('/obtener-usuario-por-id/:id', ensureAuth, UsuarioController.obtenerUsuarioPorId);
-usuarioRouter.put('/actualizar-usuario/:id', ensureAuth, UsuarioController.actualizarUsuario);
-usuarioRouter.patch('/actualizar-estado-usuario/:id', ensureAuth, upload('fotos_perfil').single('foto'), UsuarioController.actualizarEstadoUsuario);
+usuarioRouter.put('/actualizar-usuario/:id', ensureAuth, upload('fotos_perfil').single('foto'), UsuarioController.actualizarUsuario);
+usuarioRouter.patch('/actualizar-estado-usuario/:id', ensureAuth, UsuarioController.actualizarEstadoUsuario);
 
 export default usuarioRouter;

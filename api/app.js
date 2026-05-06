@@ -9,7 +9,7 @@ import path from 'path';
 import logger from './src/middlewares/logger.js';
 import cookieParser from 'cookie-parser';
 import { connectDB } from './src/config/db.js';
-import { seedInicial } from './src/utils/createAdmin.js';
+import { seedInicial } from './src/utils/seedInicial.js';
 
 // Importación de rutas base
 import authRouter from './src/routes/auth.route.js';
@@ -30,18 +30,18 @@ const app = express();
 
 // Middlewares
 app.use(logger); // Registra las peticiones que recibe la API
-app.use(helmet()); // Seguridad base -> Setea headers http para vulnerabilidades web comunes
+app.use(helmet({ // Seguridad base -> Setea headers http para vulnerabilidades web comunes
+    crossOriginResourcePolicy: { policy: "cross-origin" } // Permite compartir recursos estaticos entre origenes
+}));
 app.use(express.json()); // Convierte el cuerpo de las peticiones a json -> content-type: application/json
 app.use(express.urlencoded({ extended: true }));  // Parsea datos codificados en la URL -> content-type: application/x-www-form-urlencoded
 app.use(cookieParser()); // Manejo de cookies
 
 // Configuracion de CORS
-app.use(
-    cors({
-        origin: ["http://localhost:3000"],
-        credentials: true
-    })
-);
+app.use(cors({
+    origin: ["http://localhost:3000"], // Dominios permitidos
+    credentials: true
+}));
 
 // Ensamble de rutas a exponer
 app.use('/api', authRouter);

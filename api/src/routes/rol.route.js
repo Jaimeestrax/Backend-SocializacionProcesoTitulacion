@@ -9,6 +9,7 @@ rolRouter.patch('/actualizar-estado-rol/:id', ensureAuth, RolController.actualiz
 rolRouter.post('/obtener-roles', ensureAuth, RolController.obtenerRoles);
 rolRouter.put('/actualizar-rol/:id', ensureAuth, RolController.actualizarRol);
 rolRouter.get('/obtener-rol-por-id/:id', ensureAuth, RolController.obtenerRolPorId);
-rolRouter.get('/obtener-roles-activos', ensureAuth, RolController.obtenerRolesActivos);
+rolRouter.get('/contar-roles-activos', ensureAuth, RolController.contarRolesActivos);
+rolRouter.get('/listar-roles', ensureAuth, RolController.listarRoles);
 
 export default rolRouter;

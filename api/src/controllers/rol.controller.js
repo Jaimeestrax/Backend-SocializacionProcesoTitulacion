@@ -9,9 +9,14 @@ async function registrarRol(req, res) {
             return res.status(400).send({ message: 'No se ha proporcionado el nombre del rol' });
         }
 
+        // Obtención de último código para identificador
+        const ultimoCodigo = await Rol.findOne().sort({ codigo: -1 }); // Ordena de mayor a menor
+        const nuevoCodigo = ultimoCodigo ? ultimoCodigo.codigo + 1 : 1;
+
         // Creación del nuevo rol
         const nuevoRol = new Rol({
             nombre,
+            codigo: nuevoCodigo,
             estado: 1
         });
 
@@ -22,6 +27,10 @@ async function registrarRol(req, res) {
 
     } catch (error) {
         console.log('No se pudo registrar el rol', error.name);
+        // Mensaje para cuando el tipo de error es campo duplicado
+        if (error.code === 11000) {
+            return res.status(409).send({ message: 'El rol ya existe' });
+        }
         res.status(500).send({ message: 'Error interno del servidor' });
     }
 }
@@ -117,7 +126,7 @@ async function obtenerRolPorId(req, res) {
     }
 }
 
-async function obtenerRolesActivos(req, res) {
+async function contarRolesActivos(req, res) {
     try {
         const rolesEncontrados = await Rol.countDocuments({ estado: 1 });
 
@@ -131,13 +140,27 @@ async function obtenerRolesActivos(req, res) {
     }
 }
 
+async function listarRoles(req, res) {
+    try {
+        const rolesEncontrados = await Rol.find({ estado: 1 });
+        res.status(200).send({
+            message: 'Roles obtenidos exitosamente',
+            data: rolesEncontrados
+        });
+    } catch (error) {
+        console.log('No se pudo obtener los roles', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
 const RolController = {
     registrarRol,
     obtenerRoles,
     actualizarEstadoRol,
     actualizarRol,
     obtenerRolPorId,
-    obtenerRolesActivos
+    contarRolesActivos,
+    listarRoles
 }
 
 export default RolController;

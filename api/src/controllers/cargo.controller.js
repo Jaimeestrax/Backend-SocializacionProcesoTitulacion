@@ -75,10 +75,10 @@ async function obtenerCargos(req, res) {
 
 async function listarCargos(req, res) {
     try {
-        const cargos = await Cargo.find();
+        const cargosEncontrados = await Cargo.find({ estado: 1 });
         res.status(200).send({
             message: "Cargos obtenidos exitosamente",
-            data: cargos
+            data: cargosEncontrados
         });
     } catch (error) {
         console.error('No se pudo obtener los cargos', error.name);

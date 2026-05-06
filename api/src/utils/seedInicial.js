@@ -1,14 +1,14 @@
 import Rol from "../schemas/rol.model.js";
 import Cargo from "../schemas/cargo.model.js";
 import Usuario from "../schemas/usuario.model.js";
-import { hashear } from "../utils/bcrypt.js";
+import { hashear } from "./bcrypt.js";
 
 // Inicialización de la base de datos
 export async function seedInicial() {
     // 1. Creación de rol administrador
     const existeRolAdmin = await Rol.exists({});
     if (!existeRolAdmin) {
-        await Rol.create({ nombre: "Administrador", estado: 1 });
+        await Rol.create({ nombre: "Administrador", codigo: 1, estado: 1 }); // El primer rol tiene código 1
         console.log("Rol administrador creado");
     }
 
@@ -44,8 +44,8 @@ export async function seedInicial() {
 
         // Creación del primer usuario del sistema
         await Usuario.create({
-            nombres: 'Admin',
-            apellidos: 'Prueba',
+            nombres: 'Jaime',
+            apellidos: 'Estrada',
             correo: process.env.ADMIN_EMAIL,
             usuario: process.env.ADMIN_USER,
             contrasena: contrasenaHasheada,

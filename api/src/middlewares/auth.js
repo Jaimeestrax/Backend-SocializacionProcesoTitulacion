@@ -28,7 +28,7 @@ export async function ensureAuth(req, res, next) {
         const payload = verificarToken(token);
 
         // 4. Busca el usuario
-        req.user = await Usuario.findById(payload._id).populate('idCargo', 'nombre');
+        req.user = await Usuario.findById(payload._id).populate('idCargo', 'nombre').populate('idRol', 'codigo nombre');
 
         if (!req.user) {
             return res.status(401).send({

@@ -27,9 +27,10 @@ const fileFilter = (req, file, cb) => {
 
 export const upload = (rutaDestino) => {
     const storage = multer.diskStorage({
-        // Directorio donde se guarda el archivo
+        // Directorio donde se guarda el archivo -> independiente del SO
         destination: (req, file, cb) => {
-            cb(null, `uploads/${rutaDestino}`);
+            const ruta = path.join("uploads", rutaDestino);
+            cb(null, ruta);
         },
         // Nombre asignado
         filename: (req, file, cb) => {

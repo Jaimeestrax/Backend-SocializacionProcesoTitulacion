@@ -16,7 +16,7 @@ const instrumentoSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    ruta: {
+    archivo: {
         type: String,
         required: true,
         unique: true

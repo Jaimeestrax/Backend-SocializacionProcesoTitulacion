@@ -11,10 +11,24 @@ async function login(req, res) {
         }
 
         // Buscar usuario
-        const usuarioEncontrado = await Usuario.findOne({ usuario }).select('+contrasena'); // Para acceder a la contraseña
+        const usuarioEncontrado = await Usuario.findOne({ usuario })
+            .select('+contrasena') // Para acceder a la contraseña
+            .populate('idRol', 'codigo estado'); // Union con el código del rol
 
+        // Verificar que el usuario exista
         if (!usuarioEncontrado) {
             return res.status(401).send({ message: 'Credenciales inválidas' });
+        }
+
+        // Verificar que el usuario este activo
+        if (usuarioEncontrado.estado !== 1) {
+            // 403 Forbidden -> El usuario no tiene permisos para realizar la acción
+            return res.status(403).send({ message: 'Su usuario se encuentra desactivado' });
+        }
+
+        // Verificar que el rol del usuario este activo
+        if (usuarioEncontrado.idRol.estado !== 1) {
+            return res.status(403).send({ message: 'Usted no tiene permisos para acceder' });
         }
 
         // Comparación de contraseñas

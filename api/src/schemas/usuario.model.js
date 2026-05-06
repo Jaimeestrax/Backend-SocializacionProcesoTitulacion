@@ -45,10 +45,6 @@ const usuarioSchema = new mongoose.Schema({
         ref: 'Cargo',
         required: true
     },
-    descripcion: {
-        type: String,
-        required: false
-    },
     fechaInicio: {
         type: Date,
         required: true,
@@ -60,7 +56,8 @@ const usuarioSchema = new mongoose.Schema({
     },
     estado: {
         type: Number, // 0: Desactivo, 1: Activo, 2: Eliminado
-        required: true
+        required: true,
+        default: 1
     }
 }, {
     timestamps: false,

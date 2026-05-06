@@ -18,10 +18,10 @@ async function registrarUsuario(req, res) {
         }
 
         // Validación de contraseña segura
-        if (contrasena.length < 14) {
-            // Según NIST 2024 debe ser al menos de 14 caracteres
-            return res.status(400).send({ message: 'La contraseña debe tener al menos 14 caracteres' });
-        }
+        // if (contrasena.length < 14) {
+        //     // Según NIST 2024 debe ser al menos de 14 caracteres
+        //     return res.status(400).send({ message: 'La contraseña debe tener al menos 14 caracteres' });
+        // }
 
         // Cifrado de contraseña
         const contrasenaHasheada = await hashear(contrasena);
@@ -83,8 +83,8 @@ async function obtenerUsuarios(req, res) {
             page: req.body.pagina || 1,
             limit: req.body.limite || 10,
             populate: [
-                { path: 'idRol', select: 'nombre' },
-                { path: 'idCargo', select: 'nombre' }
+                { path: 'idRol', select: 'nombre estado' },
+                { path: 'idCargo', select: 'nombre estado' }
             ]
         };
 
@@ -107,7 +107,6 @@ async function obtenerUsuarios(req, res) {
 async function actualizarUsuario(req, res) {
     try {
         const { id } = req.params;
-
         const datosActualizar = { ...req.body };
 
         // Solo se actualiza la contraseña si se recibe una nueva contraseña
@@ -120,12 +119,20 @@ async function actualizarUsuario(req, res) {
         }
 
         if (req.file) {
-            datosActualizar.foto = req.file.path;
+            // Ruta multiplataforma
+            datosActualizar.foto = req.file.path.replace(/\\/g, '/');
         }
+
+        // Buscar el usuario a actualizar para eliminar foto vieja si se sube una nueva
+        const usuarioAnterior = req.file ? await Usuario.findById(id).select('foto') : null;
 
         const usuarioActualizado = await Usuario.findByIdAndUpdate(id, datosActualizar, { new: true });
 
         if (usuarioActualizado) {
+            // Borra foto vieja si se actualizo correctamente
+            if (req.file && usuarioAnterior && usuarioAnterior.foto) {
+                await eliminarArchivoFisico(usuarioAnterior.foto);
+            }
             res.status(200).send({ message: 'Usuario actualizado exitosamente' });
         } else {
             if (req.file) {
@@ -151,8 +158,14 @@ async function actualizarEstadoUsuario(req, res) {
             return res.status(400).send({ message: 'No se ha proporcionado el estado' });
         }
 
+        // Si el usuario es eliminado (2), se establece la fecha de finalización
+        let fechaFin = null;
+        if (estado === 2) {
+            fechaFin = new Date();
+        }
+
         // Actualizar estado del usuario
-        const usuarioActualizado = await Usuario.findByIdAndUpdate(id, { estado }, { new: true });
+        const usuarioActualizado = await Usuario.findByIdAndUpdate(id, { estado, fechaFin }, { new: true });
 
         if (usuarioActualizado) {
             res.status(200).send({ message: 'Estado del usuario actualizado exitosamente' });

@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 export function generarToken(usuario) {
     const payload = {
         _id: usuario._id,
+        rol: usuario.idRol.codigo // La cookie se generara con un código de rol
     }
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '12 h' });
 }
