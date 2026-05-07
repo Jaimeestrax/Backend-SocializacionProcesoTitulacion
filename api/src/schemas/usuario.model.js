@@ -58,7 +58,19 @@ const usuarioSchema = new mongoose.Schema({
         type: Number, // 0: Desactivo, 1: Activo, 2: Eliminado
         required: true,
         default: 1
-    }
+    },
+    // Recuperación de contraseña
+    resetPasswordToken: {
+        type: String,
+        required: false,
+        select: false
+    },
+    // Caducidad del token enviado
+    resetPasswordExpires: {
+        type: Date,
+        required: false,
+        select: false
+    },
 }, {
     timestamps: false,
     versionKey: false,
