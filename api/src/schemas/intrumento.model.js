@@ -2,10 +2,15 @@ import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
 const instrumentoSchema = new mongoose.Schema({
+    // Código atado a la actividad de un subproceso
     identificador: {
         type: String,
-        required: true,
+        required: false,
         trim: true
+    },
+    codigo: { // Código interno compartido entre historicos de cada instrumento
+        type: Number,
+        required: true
     },
     nombre: {
         type: String,
@@ -22,38 +27,41 @@ const instrumentoSchema = new mongoose.Schema({
         unique: true
     },
     // Histórico -> periodo de vigencia
-    estado: {
+    estado: { // Activo - inactivo
         type: Boolean,
-        required: true
+        required: true,
+        default: true
     },
     version: {
         type: Number,
-        required: true
+        required: true,
+        default: 1
     },
     fechaInicio: {
-        type: Date,
-        required: true
-    },
-    fechaFin: {
-        type: Date,
-        required: true
-    },
-    // Datos de auditoría
-    fechaRegistro: {
         type: Date,
         required: true,
         default: Date.now
     },
+    fechaFin: {
+        type: Date,
+        required: false
+    },
+    vigente: {
+        type: Boolean,
+        required: true,
+        default: true
+    },
+    // Datos de auditoría
     fechaActualizacion: {
         type: Date,
         required: false
     },
-    generadoPor: {
+    idEncargadoGenerar: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Usuario',
         required: true
     },
-    actualizadoPor: {
+    idEncargadoActualizar: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Usuario',
         required: false
