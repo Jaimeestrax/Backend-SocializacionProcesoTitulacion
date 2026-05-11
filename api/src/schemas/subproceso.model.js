@@ -17,6 +17,10 @@ const subprocesoSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    orden: {
+        type: Number,
+        required: true
+    },
     actividades: [{
         nombre: {
             type: String,

@@ -2,10 +2,10 @@ import Subproceso from "../schemas/subproceso.model.js";
 
 async function registrarSubproceso(req, res) {
     try {
-        const { identificador, nombre, descripcion, actividades, idEncargadoGenerar } = req.body;
+        const { identificador, nombre, descripcion, orden, actividades, idEncargadoGenerar } = req.body;
 
         // Información general del subproceso
-        if (!identificador || !nombre || !descripcion || !actividades || actividades.length === 0 || !idEncargadoGenerar) {
+        if (!identificador || !nombre || !descripcion || !orden || !actividades || actividades.length === 0 || !idEncargadoGenerar) {
             return res.status(400).send({ message: 'No se ha proporcionado toda la información del subproceso' });
         }
 
@@ -18,11 +18,15 @@ async function registrarSubproceso(req, res) {
             }
         }
 
+        // Desplazar ordenes en caso de que se haya enviado un orden que ya estaba
+        await Subproceso.updateMany({ orden: { $gte: orden }, estado: { $ne: 2 } }, { $inc: { orden: 1 } }); // inc -> incrementa 1 al valor
+
         // Creación de subproceso con actividades embebidas
         const nuevoSubproceso = new Subproceso({
             identificador,
             nombre,
             descripcion,
+            orden,
             actividades,
             idEncargadoGenerar
         });
@@ -41,7 +45,8 @@ async function obtenerSubprocesos(req, res) {
     try {
         const options = {
             page: req.body.pagina || 1,
-            limit: req.body.limite || 10,
+            limit: req.body.limite || 20,
+            sort: { orden: 1 }, // Orden ascendente
             populate: [
                 { path: 'actividades.idParticipante', select: 'nombre' },
                 { path: 'actividades.instrumentos', select: 'codigo nombre archivo version' }
@@ -75,6 +80,7 @@ async function actualizarSubproceso(req, res) {
             !datosActualizar.identificador ||
             !datosActualizar.nombre ||
             !datosActualizar.descripcion ||
+            !datosActualizar.orden ||
             !datosActualizar.actividades ||
             datosActualizar.actividades.length === 0 ||
             !datosActualizar.idEncargadoActualizar
@@ -91,12 +97,52 @@ async function actualizarSubproceso(req, res) {
             }
         }
 
-        datosActualizar.fechaAtualizacion = new Date(); // Actualiza la fecha de modificación
-        const subprocesoActualizado = await Subproceso.findByIdAndUpdate(id, datosActualizar, { new: true });
+        // Actualización de orden
+        const subprocesoActual = await Subproceso.findById(id);
 
-        if (!subprocesoActualizado) {
-            return res.status(404).send({ message: 'No se encontro el subproceso' });
+        if (!subprocesoActual) {
+            return res.status(404).send({ message: 'No se encontró el subproceso' });
         }
+
+        const ordenAnterior = subprocesoActual.orden;
+        const nuevoOrden = datosActualizar.orden;
+
+        // Verificamos si cambio el orden
+        if (ordenAnterior !== nuevoOrden) {
+            // Caso 1: Bajo de orden -> los demás deben subir
+            if (nuevoOrden < ordenAnterior) {
+                await Subproceso.updateMany(
+                    {
+                        _id: { $ne: id }, // No se incluye el subproceso actual
+                        // Orden mayor o igual al nuevo orden y menor al anterior -> establece rango de elementos a mover
+                        orden: {
+                            $gte: nuevoOrden,
+                            $lt: ordenAnterior
+                        },
+                        estado: { $ne: 2 }
+                    }, { $inc: { orden: 1 } }
+                );
+            }
+            // Caso 2: Subió de orden -> los demás deben bajar
+            else {
+                await Subproceso.updateMany(
+                    {
+                        _id: { $ne: id },
+                        orden: {
+                            $gt: ordenAnterior,
+                            $lte: nuevoOrden
+                        },
+                        estado: { $ne: 2 }
+                    },
+                    {
+                        $inc: { orden: -1 } // Decrementa en 1 al orden de los elementos
+                    }
+                );
+            }
+        }
+
+        datosActualizar.fechaActualizacion = new Date(); // Actualiza la fecha de modificación
+        const subprocesoActualizado = await Subproceso.findByIdAndUpdate(id, datosActualizar, { new: true });
 
         res.status(200).send({
             message: 'Subproceso actualizado exitosamente',

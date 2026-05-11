@@ -18,12 +18,13 @@ import usuarioRouter from './src/routes/usuario.route.js';
 import subprocesoRouter from './src/routes/subproceso.route.js';
 import cargoRouter from './src/routes/cargo.route.js';
 import rolRouter from './src/routes/rol.route.js';
+import planificacionRouter from './src/routes/planificacion.route.js';
 
 // Conexión a la base de datos
 await connectDB();
 
 // Crear admin si no existe
-await seedInicial();
+// await seedInicial(); -> Descomentar para primer seed
 
 // Instancia de express
 const app = express();
@@ -50,6 +51,7 @@ app.use('/api', usuarioRouter);
 app.use('/api', subprocesoRouter);
 app.use('/api', cargoRouter);
 app.use('/api', rolRouter);
+app.use('/api', planificacionRouter);
 
 // Servir archivos estaticos
 app.use('/uploads', express.static(path.resolve('uploads')));

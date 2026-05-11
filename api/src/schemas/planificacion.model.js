@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
 const planificacionSchema = new mongoose.Schema({
-
     // Inicio del periodo
     fechaInicio: {
         type: Date,
@@ -33,10 +32,6 @@ const planificacionSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        orden: {
-            type: Number,
-            required: true
-        },
         fechaInicio: {
             type: Date,
             required: true
@@ -52,10 +47,6 @@ const planificacionSchema = new mongoose.Schema({
             },
             descripcion: {
                 type: String,
-                required: true
-            },
-            orden: {
-                type: Number,
                 required: true
             },
             fechaInicio: {
