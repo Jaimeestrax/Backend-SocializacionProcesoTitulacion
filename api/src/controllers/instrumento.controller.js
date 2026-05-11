@@ -217,7 +217,7 @@ async function obtenerHistoricoInstrumento(req, res) {
 
 async function contarInstrumentosVigentes(req, res) {
     try {
-        const instrumentosEncontrados = await Instrumento.find({ vigente: true }).countDocuments();
+        const instrumentosEncontrados = await Instrumento.countDocuments({ vigente: true });
         res.status(200).send({
             message: 'Instrumentos vigentes obtenidos exitosamente',
             data: instrumentosEncontrados

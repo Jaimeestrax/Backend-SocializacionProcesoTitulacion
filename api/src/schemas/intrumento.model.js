@@ -2,13 +2,8 @@ import mongoose from "mongoose";
 import mongoosePaginate from "mongoose-paginate-v2";
 
 const instrumentoSchema = new mongoose.Schema({
-    // Código atado a la actividad de un subproceso
-    identificador: {
-        type: String,
-        required: false,
-        trim: true
-    },
-    codigo: { // Código interno compartido entre historicos de cada instrumento
+    // Código interno compartido entre historicos de cada instrumento
+    codigo: {
         type: Number,
         required: true
     },

@@ -14,17 +14,22 @@ const noticiaSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    subproceso: {
+    idPlanificacion: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Subproceso',
-        required: false
+        ref: 'Planificacion',
+        required: true
+    },
+    estado: {
+        type: Boolean,
+        required: true,
+        default: true
     },
     imagen: {
         type: String,
         required: false,
         unique: true
     },
-    idEncargado: {
+    idEncargadoGenerar: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Usuario',
         required: true

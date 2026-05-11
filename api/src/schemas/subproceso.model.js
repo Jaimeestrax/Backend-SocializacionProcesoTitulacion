@@ -5,7 +5,8 @@ const subprocesoSchema = new mongoose.Schema({
     identificador: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        uppercase: true
     },
     nombre: {
         type: String,
@@ -16,23 +17,34 @@ const subprocesoSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    orden: {
-        type: Number,
-        required: true
-    },
-    fechaInicio: {
-        type: Date,
-        required: false
-    },
-    fechaFin: {
-        type: Date,
-        required: false
-    },
     actividades: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Actividad',
-        required: true
+        nombre: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        descripcion: {
+            type: String,
+            required: true
+        },
+        // Cargo de negocio responsable
+        idParticipante: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Cargo',
+            required: true
+        },
+        // Instrumentos asociados a la actividad
+        instrumentos: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Instrumento',
+            required: false
+        }]
     }],
+    estado: {
+        type: Number,
+        required: true,
+        default: 1
+    },
     fechaRegistro: {
         type: Date,
         required: true,
@@ -42,12 +54,12 @@ const subprocesoSchema = new mongoose.Schema({
         type: Date,
         required: false
     },
-    generadoPor: {
+    idEncargadoGenerar: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Usuario',
         required: true
     },
-    actualizadoPor: {
+    idEncargadoActualizar: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Usuario',
         required: false
