@@ -19,6 +19,8 @@ import subprocesoRouter from './src/routes/subproceso.route.js';
 import cargoRouter from './src/routes/cargo.route.js';
 import rolRouter from './src/routes/rol.route.js';
 import planificacionRouter from './src/routes/planificacion.route.js';
+import noticiaRouter from './src/routes/noticia.route.js';
+//import faqRouter from './src/routes/faq.route.js';
 
 // Conexión a la base de datos
 await connectDB();
@@ -52,6 +54,8 @@ app.use('/api', subprocesoRouter);
 app.use('/api', cargoRouter);
 app.use('/api', rolRouter);
 app.use('/api', planificacionRouter);
+app.use('/api', noticiaRouter);
+//app.use('/api', faqRouter);
 
 // Servir archivos estaticos
 app.use('/uploads', express.static(path.resolve('uploads')));

@@ -1,4 +1,5 @@
 import Planificacion from "../schemas/planificacion.model.js";
+import Noticia from "../schemas/noticia.model.js";
 
 async function registrarPlanificacion(req, res) {
     try {
@@ -44,6 +45,12 @@ async function registrarPlanificacion(req, res) {
         });
 
         await nuevaPlanificacion.save();
+
+        // Las demás planificaciones se marcan como deshabilitadas -> solo una queda vigente
+        await Planificacion.updateMany({ _id: { $ne: nuevaPlanificacion._id } }, { estado: false });
+        // Las noticias automáticamente pasan a estado false
+        await Noticia.updateMany({ idPlanificacion: { $ne: nuevaPlanificacion._id }, estado: true }, { estado: false });
+        // No usa type objectId porque se usa la info de la planificacion creada
 
         res.status(201).send({ message: 'Planificación registrada exitosamente' });
     } catch (error) {
@@ -163,6 +170,13 @@ async function actualizarEstadoPlanificacion(req, res) {
             return res.status(404).send({ message: "No se encontró la planificación" });
         }
 
+        // Si se desactiva la planificación -> cumplio vigencia
+        if (estado === false) {
+            // Las noticias de esa planificación automáticamente pasan a estado false
+            await Noticia.updateMany({ idPlanificacion: id, estado: true }, { estado: false });
+            // Object id porque de params viene como string y no se puede comparar asi nomas
+        }
+
         res.status(200).send({
             message: "Estado de la planificación actualizado exitosamente",
             data: planificacionActualizada
@@ -198,10 +212,33 @@ async function obtenerPlanificacionPorId(req, res) {
     }
 }
 
+async function obtenerPlanificacionVigente(req, res) {
+    try {
+        const planificacionVigente = await Planificacion.findOne({ estado: true })
+            .populate([
+                { path: "subprocesos.actividades.idParticipante", select: "nombre" },
+                { path: "subprocesos.actividades.instrumentos.idInstrumento", select: "codigo nombre archivo version" }
+            ]);
+
+        if (!planificacionVigente) {
+            return res.status(404).send({ message: "No se encontró una planificación vigente" });
+        }
+
+        res.status(200).send({
+            message: "Planificación vigente obtenida exitosamente",
+            data: planificacionVigente
+        });
+    } catch (error) {
+        console.error("No se pudo obtener la planificación vigente: ", error.name);
+        res.status(500).send({ message: "Error interno del servidor" });
+    }
+}
+
 export default {
     registrarPlanificacion,
     obtenerPlanificaciones,
     actualizarPlanificacion,
     actualizarEstadoPlanificacion,
-    obtenerPlanificacionPorId
+    obtenerPlanificacionPorId,
+    obtenerPlanificacionVigente
 }

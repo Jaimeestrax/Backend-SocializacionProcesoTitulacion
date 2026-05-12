@@ -51,6 +51,7 @@ async function obtenerInstrumentos(req, res) {
         const options = {
             page: req.body.pagina || 1,
             limit: req.body.limite || 10,
+            sort: { _id: -1 },
             populate: [
                 { path: 'idEncargadoGenerar', select: 'nombres apellidos' },
                 { path: 'idEncargadoActualizar', select: 'nombres apellidos' }
@@ -93,6 +94,11 @@ async function obtenerInstrumentoPorId(req, res) {
     try {
         const { id } = req.params; // Obtenemos el id desde url
         const instrumentoEncontrado = await Instrumento.findById(id);
+
+        if (!instrumentoEncontrado) {
+            return res.status(404).send({ message: 'No se encontro el instrumento' });
+        }
+
         res.status(200).send({
             message: 'Instrumento obtenido exitosamente',
             data: instrumentoEncontrado

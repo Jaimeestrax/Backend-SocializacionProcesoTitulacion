@@ -9,5 +9,6 @@ planificacionRouter.post('/obtener-planificaciones', ensureAuth, PlanificacionCo
 planificacionRouter.put('/actualizar-planificacion/:id', ensureAuth, PlanificacionController.actualizarPlanificacion);
 planificacionRouter.patch('/actualizar-estado-planificacion/:id', ensureAuth, PlanificacionController.actualizarEstadoPlanificacion);
 planificacionRouter.get('/obtener-planificacion-por-id/:id', ensureAuth, PlanificacionController.obtenerPlanificacionPorId);
+planificacionRouter.get('/obtener-planificacion-vigente', ensureAuth, PlanificacionController.obtenerPlanificacionVigente);
 
 export default planificacionRouter;
