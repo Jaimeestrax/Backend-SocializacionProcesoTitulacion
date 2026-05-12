@@ -213,13 +213,37 @@ async function contarSubprocesosActivos(req, res) {
     }
 }
 
+async function listarSubprocesosActivos(req, res) {
+    try {
+        const subprocesosActivos = await Subproceso.find({ estado: 1 })
+            .sort({ orden: 1 })
+            .populate([
+                { path: 'actividades.idParticipante', select: 'nombre' },
+                { path: 'actividades.instrumentos', select: 'codigo nombre archivo version' }
+            ]);
+
+        if (subprocesosActivos.length === 0) {
+            return res.status(404).send({ message: 'No se encontraron subprocesos activos' });
+        }
+
+        res.status(200).send({
+            message: 'Subprocesos activos obtenidos exitosamente',
+            data: subprocesosActivos
+        });
+    } catch (error) {
+        console.error('No se pudo listar los subprocesos activos', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
 const SubprocesoController = {
     registrarSubproceso,
     obtenerSubprocesos,
     actualizarSubproceso,
     actualizarEstadoSubproceso,
     obtenerSubprocesoPorId,
-    contarSubprocesosActivos
+    contarSubprocesosActivos,
+    listarSubprocesosActivos
 }
 
 export default SubprocesoController;

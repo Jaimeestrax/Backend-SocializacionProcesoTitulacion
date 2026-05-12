@@ -26,13 +26,26 @@ const noticiaSchema = new mongoose.Schema({
     },
     imagen: {
         type: String,
-        required: false,
-        unique: true
+        required: false
+    },
+    fechaRegistro: {
+        type: Date,
+        required: true,
+        default: Date.now
+    },
+    fechaActualizacion: {
+        type: Date,
+        required: false
     },
     idEncargadoGenerar: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Usuario',
         required: true
+    },
+    idEncargadoActualizar: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: false
     }
 }, {
     timestamps: false,

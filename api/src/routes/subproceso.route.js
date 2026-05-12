@@ -10,5 +10,6 @@ subprocesoRouter.put('/actualizar-subproceso/:id', ensureAuth, SubprocesoControl
 subprocesoRouter.patch('/actualizar-estado-subproceso/:id', ensureAuth, SubprocesoController.actualizarEstadoSubproceso);
 subprocesoRouter.get('/obtener-subproceso-por-id/:id', ensureAuth, SubprocesoController.obtenerSubprocesoPorId);
 subprocesoRouter.get('/contar-subprocesos-activos', ensureAuth, SubprocesoController.contarSubprocesosActivos);
+subprocesoRouter.get('/listar-subprocesos-activos', ensureAuth, SubprocesoController.listarSubprocesosActivos);
 
 export default subprocesoRouter;
