@@ -234,11 +234,68 @@ async function obtenerPlanificacionVigente(req, res) {
     }
 }
 
+async function obtenerPeriodoActual(req, res) {
+    try {
+        const planificacionVigente = await Planificacion.findOne({ estado: true });
+
+        let periodoActual;
+        // Si no hay planificación vigente no hay periodo actual
+        if (!planificacionVigente) {
+            periodoActual = "SIN INFORMACIÓN";
+        } else {
+            // Se obtiene fecha inicio y fecha fin para dar el formato del periodo
+            const fechaInicio = planificacionVigente.fechaInicio;
+            const fechaFin = planificacionVigente.fechaFin;
+
+            const meses = [
+                "ENERO",
+                "FEBRERO",
+                "MARZO",
+                "ABRIL",
+                "MAYO",
+                "JUNIO",
+                "JULIO",
+                "AGOSTO",
+                "SEPTIEMBRE",
+                "OCTUBRE",
+                "NOVIEMBRE",
+                "DICIEMBRE"
+            ];
+
+            // Tomamos solo YYYY-MM-DD
+            const [anioInicio, mesInicio] = fechaInicio.split("T")[0].split("-");
+            const [anioFin, mesFin] = fechaFin.split("T")[0].split("-");
+
+            const nombreMesInicio = meses[Number(mesInicio) - 1];
+            const nombreMesFin = meses[Number(mesFin) - 1];
+
+            // Mismo año
+            if (anioInicio === anioFin) {
+                periodoActual = `${nombreMesInicio}-${nombreMesFin} ${anioInicio}`;
+            }
+
+            // Diferente año
+            periodoActual = `${nombreMesInicio} ${anioInicio}-${nombreMesFin} ${anioFin}`;
+        }
+
+        res.status(200).send({
+            message: "Periodo actual obtenido exitosamente",
+            data: periodoActual
+        });
+    } catch (error) {
+        console.error("No se pudo obtener el periodo actual: ", error.name);
+        res.status(500).send({ message: "Error interno del servidor" });
+    }
+}
+
 export default {
     registrarPlanificacion,
     obtenerPlanificaciones,
     actualizarPlanificacion,
     actualizarEstadoPlanificacion,
     obtenerPlanificacionPorId,
-    obtenerPlanificacionVigente
+    obtenerPlanificacionVigente,
+
+    // Consultas públicas
+    obtenerPeriodoActual
 }

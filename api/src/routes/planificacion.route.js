@@ -11,4 +11,8 @@ planificacionRouter.patch('/actualizar-estado-planificacion/:id', ensureAuth, Pl
 planificacionRouter.get('/obtener-planificacion-por-id/:id', ensureAuth, PlanificacionController.obtenerPlanificacionPorId);
 planificacionRouter.get('/obtener-planificacion-vigente', ensureAuth, PlanificacionController.obtenerPlanificacionVigente);
 
+// Rutas públicas -> sin token
+planificacionRouter.get('/obtener-periodo-actual', PlanificacionController.obtenerPeriodoActual);
+
+
 export default planificacionRouter;
