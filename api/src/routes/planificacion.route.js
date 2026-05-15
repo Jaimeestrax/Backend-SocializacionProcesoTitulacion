@@ -9,10 +9,14 @@ planificacionRouter.post('/obtener-planificaciones', ensureAuth, PlanificacionCo
 planificacionRouter.put('/actualizar-planificacion/:id', ensureAuth, PlanificacionController.actualizarPlanificacion);
 planificacionRouter.patch('/actualizar-estado-planificacion/:id', ensureAuth, PlanificacionController.actualizarEstadoPlanificacion);
 planificacionRouter.get('/obtener-planificacion-por-id/:id', ensureAuth, PlanificacionController.obtenerPlanificacionPorId);
-planificacionRouter.get('/obtener-planificacion-vigente', ensureAuth, PlanificacionController.obtenerPlanificacionVigente);
 
 // Rutas públicas -> sin token
+planificacionRouter.get('/obtener-planificacion-vigente', PlanificacionController.obtenerPlanificacionVigente);
 planificacionRouter.get('/obtener-periodo-actual', PlanificacionController.obtenerPeriodoActual);
+planificacionRouter.get('/obtener-porcentaje-avance', PlanificacionController.obtenerPorcentajeAvance);
+planificacionRouter.get('/obtener-proximas-actividades', PlanificacionController.obtenerProximasActividades);
+planificacionRouter.get('/obtener-subproceso-actual', PlanificacionController.obtenerSubprocesoActual);
+planificacionRouter.get('/obtener-actividad-por-id/:id', PlanificacionController.obtenerActividadPorId);
 
 
 export default planificacionRouter;

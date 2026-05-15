@@ -244,8 +244,8 @@ async function obtenerPeriodoActual(req, res) {
             periodoActual = "SIN INFORMACIÓN";
         } else {
             // Se obtiene fecha inicio y fecha fin para dar el formato del periodo
-            const fechaInicio = planificacionVigente.fechaInicio;
-            const fechaFin = planificacionVigente.fechaFin;
+            const fechaInicio = planificacionVigente.fechaInicio.toISOString().split('T')[0];
+            const fechaFin = planificacionVigente.fechaFin.toISOString().split('T')[0];
 
             const meses = [
                 "ENERO",
@@ -262,9 +262,9 @@ async function obtenerPeriodoActual(req, res) {
                 "DICIEMBRE"
             ];
 
-            // Tomamos solo YYYY-MM-DD
-            const [anioInicio, mesInicio] = fechaInicio.split("T")[0].split("-");
-            const [anioFin, mesFin] = fechaFin.split("T")[0].split("-");
+            // Obtenemos mes-año de inicio y fin
+            const [anioInicio, mesInicio] = fechaInicio.split("-");
+            const [anioFin, mesFin] = fechaFin.split("-");
 
             const nombreMesInicio = meses[Number(mesInicio) - 1];
             const nombreMesFin = meses[Number(mesFin) - 1];
@@ -272,10 +272,10 @@ async function obtenerPeriodoActual(req, res) {
             // Mismo año
             if (anioInicio === anioFin) {
                 periodoActual = `${nombreMesInicio}-${nombreMesFin} ${anioInicio}`;
+            } else {
+                // Diferente año
+                periodoActual = `${nombreMesInicio} ${anioInicio}-${nombreMesFin} ${anioFin}`;
             }
-
-            // Diferente año
-            periodoActual = `${nombreMesInicio} ${anioInicio}-${nombreMesFin} ${anioFin}`;
         }
 
         res.status(200).send({
@@ -288,14 +288,183 @@ async function obtenerPeriodoActual(req, res) {
     }
 }
 
+async function obtenerPorcentajeAvance(req, res) {
+    try {
+        // Obtener fecha actual
+        const hoy = new Date().toISOString().split("T")[0];
+
+        // Obtener planificacion vigente
+        const planificacionVigente = await Planificacion.findOne({ estado: true });
+
+        if (!planificacionVigente) {
+            return res.status(404).send({ message: "No existe una planificacion vigente" });
+        }
+
+        // Recorrer subprocesos para extraer actividades
+        const actividades = planificacionVigente.subprocesos.flatMap(
+            subproceso => subproceso.actividades // flatMap -> extrae elementos y concatena resultados
+        );
+
+        // Contar total actividades
+        const totalActividades = actividades.length;
+
+        if (totalActividades === 0) {
+            return res.status(404).send({ message: "No existen actividades registradas" });
+        }
+
+        // Obtener actividades finalizadas (fechaFin < hoy)
+        const actividadesCompletadas = actividades.filter(actividad => {
+            return (
+                actividad.fechaFin.toISOString().split("T")[0] < hoy
+            )
+        }).length;
+
+        // Calcular porcentaje
+        const porcentajeAvance = Number(((actividadesCompletadas / totalActividades) * 100).toFixed(2));
+
+        res.status(200).send({
+            message: "Porcentaje de avance obtenido exitosamente",
+            data: porcentajeAvance
+        });
+
+    } catch (error) {
+        console.error("No se pudo obtener el porcentaje de avance: ", error.name);
+        res.status(500).send({ message: "Error interno del servidor" });
+    }
+}
+
+async function obtenerProximasActividades(req, res) {
+    try {
+        // Obtener fecha actual
+        const hoy = new Date().toISOString().split("T")[0];
+
+        // Obtener planificacion vigente
+        const planificacionVigente = await Planificacion.findOne({ estado: true });
+
+        if (!planificacionVigente) {
+            return res.status(404).send({ message: "No se encontro una planificacion vigente" });
+        }
+
+        // Obtener subproceso actual
+        const subprocesoActual = planificacionVigente.subprocesos.find(sp => {
+            return (
+                sp.fechaInicio.toISOString().split("T")[0] <= hoy && hoy <= sp.fechaFin.toISOString().split("T")[0]
+            )
+        });
+
+        if (!subprocesoActual) {
+            return res.status(404).send({ message: "No existe un subproceso para la fecha actual" });
+        }
+
+        // Filtrar actividades que fecha inicio > hoy
+        const proximasActividades = subprocesoActual.actividades.filter(actividad => {
+            return (
+                actividad.fechaInicio.toISOString().split("T")[0] > hoy
+            )
+        });
+
+        if (!proximasActividades) {
+            return res.status(404).send({ message: "No existen próximas actividades para el subproceso actual" });
+        }
+
+        res.status(200).send({
+            message: 'Próximas actividades obtenidas exitosamente',
+            data: proximasActividades
+        });
+    } catch (error) {
+        console.error("No se pudo obtener las próximas actividades de la planificación: ", error.name);
+        res.status(500).send({ message: "Error interno del servidor" });
+    }
+}
+
+async function obtenerSubprocesoActual(req, res) {
+    try {
+        // Establecer fecha actual
+        const hoy = new Date().toISOString().split("T")[0];
+        // Buscar planificacion vigente
+        const planificacionVigente = await Planificacion.findOne({ estado: true });
+
+        if (!planificacionVigente) {
+            return res.status(404).send({ message: "No se encontro una planificacion vigente" });
+        }
+        // Dentro de los subprocesos bsucar -> fechaInicio <= actual <= fechaFin
+        const subprocesoActual = planificacionVigente.subprocesos.find(sp => {
+            return (
+                sp.fechaInicio.toISOString().split("T")[0] <= hoy && hoy <= sp.fechaFin.toISOString().split("T")[0]
+            );
+        });
+
+        if (!subprocesoActual) {
+            return res.status(404).send({ message: "No existe un subproceso para la fecha actual" });
+        }
+
+        res.status(200).send({
+            message: "Subproceso actual obtenido exitosamente",
+            data: subprocesoActual
+        });
+
+    } catch (error) {
+        console.error("No se pudo obtener el subproceso actual: ", error.name);
+        res.status(500).send({ message: "Error interno del servidor" });
+    }
+}
+
+async function obtenerActividadPorId(req, res) {
+    try {
+        const { id } = req.params; // Object id de la actividad
+
+        // Buscar la planificación vigente con esa actividad
+        const planificacionVigente = await Planificacion.findOne({
+            estado: true,
+            "subprocesos.actividades._id": id
+        }).populate([
+            { path: "subprocesos.actividades.idParticipante", select: "nombre" },
+            { path: "subprocesos.actividades.instrumentos.idInstrumento", select: "codigo nombre archivo version" }
+        ]);
+
+        if (!planificacionVigente) {
+            return res.status(404).send({ message: "No se encontró la actividad en la planificación vigente" });
+        }
+
+        let actividadEncontrada = null;
+
+        // Recorrer subprocesos
+        for (const subproceso of planificacionVigente.subprocesos) {
+            // Buscar actividad dentro del subproceso
+            const actividad = subproceso.actividades.id(id);
+            if (actividad) {
+                actividadEncontrada = actividad;
+                break;
+            }
+        }
+
+        if (!actividadEncontrada) {
+            return res.status(404).send({ message: "No se encontró la actividad especifica" });
+        }
+
+        res.status(200).send({
+            message: "Actividad obtenida exitosamente",
+            data: actividadEncontrada
+        });
+
+    } catch (error) {
+        console.error("No se pudo obtener la actividad especifica: ", error.name);
+        res.status(500).send({ message: "Error interno del servidor" });
+    }
+}
+
 export default {
     registrarPlanificacion,
     obtenerPlanificaciones,
     actualizarPlanificacion,
     actualizarEstadoPlanificacion,
     obtenerPlanificacionPorId,
-    obtenerPlanificacionVigente,
 
     // Consultas públicas
-    obtenerPeriodoActual
+    obtenerPlanificacionVigente,
+    obtenerPeriodoActual,
+    obtenerPorcentajeAvance,
+    obtenerProximasActividades,
+    obtenerSubprocesoActual,
+    obtenerActividadPorId
 }
