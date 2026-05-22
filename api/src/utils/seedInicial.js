@@ -1,6 +1,7 @@
 import Rol from "../schemas/rol.model.js";
 import Cargo from "../schemas/cargo.model.js";
 import Usuario from "../schemas/usuario.model.js";
+import Carrera from "../schemas/carrera.model.js";
 import { hashear } from "./bcrypt.js";
 
 // Inicialización de la base de datos
@@ -19,7 +20,14 @@ export async function seedInicial() {
         console.log("Cargo Presidente Comisión de Titulación creado");
     }
 
-    // 3. Creación del usuario administrador
+    // 3. Creación de una carrera por defecto
+    const existeCarrera = await Carrera.exists({});
+    if (!existeCarrera) {
+        await Carrera.create({ nombre: "Software", codigo: 'SOFT', estado: 1 });
+        console.log("Carrera de Software creada");
+    }
+
+    // 4. Creación del usuario administrador
     const existeUsuario = await Usuario.exists({}); // Exists es mas eficiente que countDocuments
 
     // Validación de info en variable de entorno
@@ -40,6 +48,12 @@ export async function seedInicial() {
             throw new Error("No existe el rol especificado para el usuario administrador en la base de datos");
         }
 
+        // Busca la carrera a la que pertenece
+        const carreraAdmin = await Carrera.findOne({ nombre: 'Software' });
+        if (!carreraAdmin) {
+            throw new Error("No existe la carrera especificada para el usuario administrador en la base de datos");
+        }
+
         const contrasenaHasheada = await hashear(process.env.ADMIN_PASS, 12);
 
         // Creación del primer usuario del sistema
@@ -51,6 +65,7 @@ export async function seedInicial() {
             contrasena: contrasenaHasheada,
             idRol: rolAdmin._id,
             idCargo: cargoAdmin._id,
+            idCarrera: carreraAdmin._id,
             estado: 1
         });
         console.log('Administrador creado exitosamente');

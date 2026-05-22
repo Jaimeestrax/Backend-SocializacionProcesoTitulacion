@@ -20,13 +20,14 @@ import cargoRouter from './src/routes/cargo.route.js';
 import rolRouter from './src/routes/rol.route.js';
 import planificacionRouter from './src/routes/planificacion.route.js';
 import noticiaRouter from './src/routes/noticia.route.js';
+import carreraRouter from './src/routes/carrera.route.js';
 //import faqRouter from './src/routes/faq.route.js';
 
 // Conexión a la base de datos
 await connectDB();
 
-// Crear admin si no existe
-// await seedInicial(); -> Descomentar para primer seed
+// Crear admin si no existe -> comentar despues del primer seed
+//await seedInicial();
 
 // Instancia de express
 const app = express();
@@ -55,6 +56,7 @@ app.use('/api', cargoRouter);
 app.use('/api', rolRouter);
 app.use('/api', planificacionRouter);
 app.use('/api', noticiaRouter);
+app.use('/api', carreraRouter);
 //app.use('/api', faqRouter);
 
 // Servir archivos estaticos
