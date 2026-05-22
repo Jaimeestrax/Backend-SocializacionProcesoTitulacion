@@ -53,7 +53,16 @@ async function obtenerSubprocesos(req, res) {
             ]
         };
 
-        const subprocesosEncontrados = await Subproceso.paginate({ estado: { $ne: 2 } }, options);
+        const filtro = { estado: { $ne: 2 } }
+
+        if (req.body.palabra && req.body.palabra.trim() !== "") {
+            filtro.$or = [
+                { identificador: { $regex: req.body.palabra.trim(), $options: "i" } },
+                { nombre: { $regex: req.body.palabra.trim(), $options: "i" } }
+            ];
+        }
+
+        const subprocesosEncontrados = await Subproceso.paginate(filtro, options);
 
         if (subprocesosEncontrados.docs.length === 0) {
             return res.status(404).send({ message: 'No se encontraron subprocesos' });

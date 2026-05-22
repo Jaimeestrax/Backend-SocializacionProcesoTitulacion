@@ -58,7 +58,16 @@ async function obtenerInstrumentos(req, res) {
             ]
         };
 
-        const instrumentosEncontrados = await Instrumento.paginate({ estado: true }, options);
+        const filtro = { estado: true }
+
+        if (req.body.palabra && req.body.palabra.trim() !== "") {
+            filtro.$or = [
+                { nombre: { $regex: req.body.palabra.trim(), $options: "i" } },
+                { descripcion: { $regex: req.body.palabra.trim(), $options: "i" } }
+            ];
+        }
+
+        const instrumentosEncontrados = await Instrumento.paginate(filtro, options);
 
         if (instrumentosEncontrados.docs.length === 0) {
             return res.status(404).send({ message: 'No se encontraron instrumentos' });

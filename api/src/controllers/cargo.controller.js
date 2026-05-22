@@ -57,7 +57,14 @@ async function obtenerCargos(req, res) {
             limit: req.body.limite || 10
         };
 
-        const cargosEncontrados = await Cargo.paginate({ estado: { $ne: 2 } }, options);
+        // Filtro de busqueda
+        const filtro = { estado: { $ne: 2 } };
+
+        if (req.body.palabra && req.body.palabra.trim() !== "") {
+            filtro.nombre = { $regex: req.body.palabra.trim(), $options: "i" }; // i -> insensitive
+        }
+
+        const cargosEncontrados = await Cargo.paginate(filtro, options);
 
         if (cargosEncontrados.docs.length === 0) {
             return res.status(404).send({ message: 'No se encontraron cargos' });

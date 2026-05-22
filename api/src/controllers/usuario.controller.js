@@ -88,7 +88,18 @@ async function obtenerUsuarios(req, res) {
             ]
         };
 
-        const usuariosEncontrados = await Usuario.paginate({ estado: { $ne: 2 } }, options);
+        const filtro = { estado: { $ne: 2 } };
+
+        if (req.body.palabra && req.body.palabra.trim() !== "") {
+            filtro.$or = [
+                { nombres: { $regex: req.body.palabra.trim(), $options: "i" } },
+                { apellidos: { $regex: req.body.palabra.trim(), $options: "i" } },
+                { correo: { $regex: req.body.palabra.trim(), $options: "i" } },
+                { usuario: { $regex: req.body.palabra.trim(), $options: "i" } }
+            ];
+        }
+
+        const usuariosEncontrados = await Usuario.paginate(filtro, options);
 
         if (usuariosEncontrados.docs.length === 0) {
             return res.status(404).send({ message: 'No se encontraron usuarios' });

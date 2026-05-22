@@ -70,7 +70,13 @@ async function obtenerPlanificaciones(req, res) {
             ]
         }
 
-        const planificacionesEncontradas = await Planificacion.paginate({}, options);
+        const filtro = {};
+
+        if (req.body.palabra && req.body.palabra.trim() !== "") {
+            filtro.periodo = { $regex: req.body.palabra.trim(), $options: "i" };
+        }
+
+        const planificacionesEncontradas = await Planificacion.paginate(filtro, options);
 
         if (planificacionesEncontradas.docs.length === 0) {
             return res.status(404).send({ message: 'No se encontraron planificaciones' });
@@ -449,6 +455,15 @@ async function obtenerActividadPorId(req, res) {
 
     } catch (error) {
         console.error("No se pudo obtener la actividad especifica: ", error.name);
+        res.status(500).send({ message: "Error interno del servidor" });
+    }
+}
+
+async function obtenerCronogramaPlanificacion(req, res) {
+    try {
+
+    } catch (e) {
+        console.error("No se pudo obtener el cronograma de la planificación: ", e.name);
         res.status(500).send({ message: "Error interno del servidor" });
     }
 }
