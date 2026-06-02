@@ -9,7 +9,11 @@ const faqSchema = new mongoose.Schema({
     respuesta: {
         type: String,
         required: true
-    }
+    },
+    keywords: [{
+        type: String,
+        required: true
+    }]
 }, {
     timestamps: false,
     versionKey: false,

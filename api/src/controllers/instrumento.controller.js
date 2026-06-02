@@ -58,7 +58,7 @@ async function obtenerInstrumentos(req, res) {
             ]
         };
 
-        const filtro = { estado: true }
+        let filtro = { estado: true }
 
         if (req.body.palabra && req.body.palabra.trim() !== "") {
             filtro.$or = [

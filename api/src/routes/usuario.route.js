@@ -11,5 +11,6 @@ usuarioRouter.post('/obtener-usuarios', ensureAuth, UsuarioController.obtenerUsu
 usuarioRouter.get('/obtener-usuario-por-id/:id', ensureAuth, UsuarioController.obtenerUsuarioPorId);
 usuarioRouter.put('/actualizar-usuario/:id', ensureAuth, upload('fotos_perfil').single('foto'), UsuarioController.actualizarUsuario);
 usuarioRouter.patch('/actualizar-estado-usuario/:id', ensureAuth, UsuarioController.actualizarEstadoUsuario);
+usuarioRouter.get('/contar-usuarios-activos', ensureAuth, UsuarioController.contarUsuariosActivos);
 
 export default usuarioRouter;

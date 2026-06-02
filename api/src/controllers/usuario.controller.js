@@ -4,10 +4,10 @@ import eliminarArchivoFisico from "../utils/eliminarArchivo.js";
 
 async function registrarUsuario(req, res) {
     try {
-        const { nombres, apellidos, correo, usuario, contrasena, idRol, idCargo } = req.body;
+        const { nombres, apellidos, correo, usuario, contrasena, idRol, idCargo, idCarrera } = req.body;
 
         // Validación de campos obligatorios
-        if (!nombres || !apellidos || !idRol || !idCargo) {
+        if (!nombres || !apellidos || !idRol || !idCargo || !idCarrera) {
             // 400 Bad Request
             return res.status(400).send({ message: 'No se ha proporcionado toda la información del usuario' });
         }
@@ -34,7 +34,8 @@ async function registrarUsuario(req, res) {
             usuario,
             contrasena: contrasenaHasheada,
             idRol,
-            idCargo
+            idCargo,
+            idCarrera
         });
 
         // Guardar nuevo usuario en la base de datos
@@ -84,11 +85,12 @@ async function obtenerUsuarios(req, res) {
             limit: req.body.limite || 10,
             populate: [
                 { path: 'idRol', select: 'nombre estado' },
-                { path: 'idCargo', select: 'nombre estado' }
+                { path: 'idCargo', select: 'nombre estado' },
+                { path: 'idCarrera', select: 'nombre estado' }
             ]
         };
 
-        const filtro = { estado: { $ne: 2 } };
+        let filtro = { estado: { $ne: 2 } };
 
         if (req.body.palabra && req.body.palabra.trim() !== "") {
             filtro.$or = [
@@ -97,6 +99,11 @@ async function obtenerUsuarios(req, res) {
                 { correo: { $regex: req.body.palabra.trim(), $options: "i" } },
                 { usuario: { $regex: req.body.palabra.trim(), $options: "i" } }
             ];
+        }
+
+        // Filtro por carrera
+        if (req.body.idCarrera) {
+            filtro.idCarrera = req.body.idCarrera;
         }
 
         const usuariosEncontrados = await Usuario.paginate(filtro, options);
@@ -204,13 +211,28 @@ async function obtenerUsuarioPorId(req, res) {
     }
 }
 
+async function contarUsuariosActivos(req, res) {
+    try {
+        const usuariosEncontrados = await Usuario.countDocuments({ estado: 1 });
+
+        res.status(200).send({
+            message: 'Total de usuarios obtenidos exitosamente',
+            data: usuariosEncontrados
+        });
+    } catch (error) {
+        console.error('No se pudo obtener el total de usuarios:', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
 const UsuarioController = {
     registrarUsuario,
     obtenerUsuarioAutenticado,
     obtenerUsuarios,
     actualizarUsuario,
     actualizarEstadoUsuario,
-    obtenerUsuarioPorId
+    obtenerUsuarioPorId,
+    contarUsuariosActivos
 }
 
 export default UsuarioController;

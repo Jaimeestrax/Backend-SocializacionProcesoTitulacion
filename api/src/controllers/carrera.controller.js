@@ -51,7 +51,7 @@ async function obtenerCarreras(req, res) {
             limit: req.body.limite || 10
         };
 
-        const filtro = { estado: { $ne: 2 } };
+        let filtro = { estado: { $ne: 2 } };
 
         if (req.body.palabra && req.body.palabra.trim() !== "") {
             filtro.$or = [

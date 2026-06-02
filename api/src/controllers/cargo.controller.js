@@ -9,8 +9,13 @@ async function registrarCargo(req, res) {
             return res.status(400).send({ message: 'No se ha proporcionado el nombre del cargo' });
         }
 
+        // Ultimo codigo para identificador
+        const ultimoCargo = await Cargo.findOne().sort({ codigo: -1 });
+        const nuevoCodigo = ultimoCargo ? ultimoCargo.codigo + 1 : 1;
+
         // Creación del nuevo cargo
         const nuevoCargo = new Cargo({
+            codigo: nuevoCodigo,
             nombre,
             estado: 1
         });
@@ -58,7 +63,7 @@ async function obtenerCargos(req, res) {
         };
 
         // Filtro de busqueda
-        const filtro = { estado: { $ne: 2 } };
+        let filtro = { estado: { $ne: 2 } };
 
         if (req.body.palabra && req.body.palabra.trim() !== "") {
             filtro.nombre = { $regex: req.body.palabra.trim(), $options: "i" }; // i -> insensitive

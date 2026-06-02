@@ -45,11 +45,11 @@ const usuarioSchema = new mongoose.Schema({
         ref: 'Cargo',
         required: true
     },
-    // idCarrera: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Carrera',
-    //     required: true
-    // },
+    idCarrera: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Carrera',
+        required: true
+    },
     fechaInicio: {
         type: Date,
         required: true,

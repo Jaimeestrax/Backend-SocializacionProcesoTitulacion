@@ -7,28 +7,28 @@ import { hashear } from "./bcrypt.js";
 // Inicialización de la base de datos
 export async function seedInicial() {
     // 1. Creación de rol administrador
-    const existeRolAdmin = await Rol.exists({});
+    const existeRolAdmin = await Rol.exists({}); // Exists es mas eficiente que countDocuments
     if (!existeRolAdmin) {
-        await Rol.create({ nombre: "Administrador", codigo: 1, estado: 1 }); // El primer rol tiene código 1
+        await Rol.create({ codigo: 1, nombre: "Administrador", estado: 1 }); // El primer rol tiene código 1
         console.log("Rol administrador creado");
     }
 
     // 2. Creación del cargo presidente comisión de titulación
     const existeCargoPresidente = await Cargo.exists({});
     if (!existeCargoPresidente) {
-        await Cargo.create({ nombre: "Presidente Comisión de Titulación", estado: 1 });
+        await Cargo.create({ codigo: 1, nombre: "Presidente Comisión de Titulación", estado: 1 });
         console.log("Cargo Presidente Comisión de Titulación creado");
     }
 
     // 3. Creación de una carrera por defecto
     const existeCarrera = await Carrera.exists({});
     if (!existeCarrera) {
-        await Carrera.create({ nombre: "Software", codigo: 'SOFT', estado: 1 });
+        await Carrera.create({ codigo: 'SOFT', nombre: "Software", estado: 1 });
         console.log("Carrera de Software creada");
     }
 
     // 4. Creación del usuario administrador
-    const existeUsuario = await Usuario.exists({}); // Exists es mas eficiente que countDocuments
+    const existeUsuario = await Usuario.exists({});
 
     // Validación de info en variable de entorno
     if (!process.env.ADMIN_PASS || !process.env.ADMIN_USER) {

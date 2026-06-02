@@ -108,7 +108,7 @@ async function obtenerNoticias(req, res) {
             return res.status(404).send({ message: 'No se encontró la planificación vigente' });
         }
 
-        const filtro = { idPlanificacion: planificacionActual._id };
+        let filtro = { idPlanificacion: planificacionActual._id };
 
         if (req.body.palabra && req.body.palabra.trim() !== "") {
             filtro.titulo = { $regex: req.body.palabra.trim(), $options: "i" };

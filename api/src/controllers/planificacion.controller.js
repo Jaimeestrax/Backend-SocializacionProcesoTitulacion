@@ -70,7 +70,7 @@ async function obtenerPlanificaciones(req, res) {
             ]
         }
 
-        const filtro = {};
+        let filtro = {};
 
         if (req.body.palabra && req.body.palabra.trim() !== "") {
             filtro.periodo = { $regex: req.body.palabra.trim(), $options: "i" };

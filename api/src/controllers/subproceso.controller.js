@@ -53,7 +53,7 @@ async function obtenerSubprocesos(req, res) {
             ]
         };
 
-        const filtro = { estado: { $ne: 2 } }
+        let filtro = { estado: { $ne: 2 } }
 
         if (req.body.palabra && req.body.palabra.trim() !== "") {
             filtro.$or = [
