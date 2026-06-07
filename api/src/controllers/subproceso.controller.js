@@ -176,10 +176,17 @@ async function actualizarEstadoSubproceso(req, res) {
         };
         const subprocesoActualizado = await Subproceso.findByIdAndUpdate(id, datosActualizar, { new: true });
 
-        res.status(200).send({
-            message: 'Estado del subproceso actualizado exitosamente',
-            data: subprocesoActualizado
-        });
+        if (estado === 2) {
+            res.status(200).send({
+                message: 'Subproceso eliminado exitosamente',
+                data: subprocesoActualizado
+            });
+        } else {
+            res.status(200).send({
+                message: 'Estado del subproceso actualizado exitosamente',
+                data: subprocesoActualizado
+            });
+        }
 
     } catch (error) {
         console.error('No se pudo actualizar el estado del subproceso', error.name);

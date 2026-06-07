@@ -163,6 +163,21 @@ async function actualizarUsuario(req, res) {
         if (req.file) {
             eliminarArchivoFisico(req.file.path);
         }
+        if (error.name === 'ValidationError') {
+            const errores = error.errors;
+            // Validación del match del correo
+            if (errores.correo && errores.correo.kind === 'match') {
+                return res.status(400).send({ message: 'El correo no cumple con el formato institucional' })
+            }
+            // Validación de usuario único
+            if (errores.usuario && errores.usuario.kind === 'unique') {
+                return res.status(400).send({ message: 'El usuario ya existe' })
+            }
+            // Validación de correo único
+            if (errores.correo && errores.correo.kind === 'unique') {
+                return res.status(400).send({ message: 'El correo ya existe' })
+            }
+        }
         res.status(500).send({ message: 'Error interno del servidor' });
     }
 }
