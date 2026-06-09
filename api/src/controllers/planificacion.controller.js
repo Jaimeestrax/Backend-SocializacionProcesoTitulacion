@@ -393,7 +393,7 @@ async function obtenerSubprocesoActual(req, res) {
         if (!planificacionVigente) {
             return res.status(404).send({ message: "No se encontro una planificacion vigente" });
         }
-        // Dentro de los subprocesos bsucar -> fechaInicio <= actual <= fechaFin
+        // Dentro de los subprocesos buscar -> fechaInicio <= actual <= fechaFin
         const subprocesoActual = planificacionVigente.subprocesos.find(sp => {
             return (
                 sp.fechaInicio.toISOString().split("T")[0] <= hoy && hoy <= sp.fechaFin.toISOString().split("T")[0]
@@ -459,11 +459,25 @@ async function obtenerActividadPorId(req, res) {
     }
 }
 
-async function obtenerCronogramaPlanificacion(req, res) {
+async function obtenerSubprocesosPlanificacionVigente(req, res) {
     try {
+        const planificacionVigente = await Planificacion.findOne({ estado: true })
+            .select("subprocesos")
+            .populate({
+                path: "subprocesos.actividades.idParticipante",
+                select: "nombre"
+            });
 
+        if (!planificacionVigente) {
+            return res.status(404).send({ message: "No se encontró una planificación vigente" });
+        }
+
+        res.status(200).send({
+            message: "Subprocesos de la planificación vigente obtenidos exitosamente",
+            data: planificacionVigente.subprocesos
+        });
     } catch (e) {
-        console.error("No se pudo obtener el cronograma de la planificación: ", e.name);
+        console.error("No se pudo obtener los subprocesos de la planificación: ", e.name);
         res.status(500).send({ message: "Error interno del servidor" });
     }
 }
@@ -481,5 +495,6 @@ export default {
     obtenerPorcentajeAvance,
     obtenerProximasActividades,
     obtenerSubprocesoActual,
-    obtenerActividadPorId
+    obtenerActividadPorId,
+    obtenerSubprocesosPlanificacionVigente
 }

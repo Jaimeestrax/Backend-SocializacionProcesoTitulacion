@@ -17,6 +17,6 @@ planificacionRouter.get('/obtener-porcentaje-avance', PlanificacionController.ob
 planificacionRouter.get('/obtener-proximas-actividades', PlanificacionController.obtenerProximasActividades);
 planificacionRouter.get('/obtener-subproceso-actual', PlanificacionController.obtenerSubprocesoActual);
 planificacionRouter.get('/obtener-actividad-por-id/:id', PlanificacionController.obtenerActividadPorId);
-
+planificacionRouter.get('/obtener-subprocesos-planificacion-vigente', PlanificacionController.obtenerSubprocesosPlanificacionVigente);
 
 export default planificacionRouter;
