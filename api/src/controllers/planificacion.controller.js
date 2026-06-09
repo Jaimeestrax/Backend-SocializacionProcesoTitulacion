@@ -543,6 +543,84 @@ async function obtenerCodigoPAO(req, res) {
     }
 }
 
+async function obtenerSubprocesoEspecificoPlanificacion(req, res) {
+    try {
+        const { id } = req.params; // Id subproceso
+        const planificacionVigente = await Planificacion
+            .findOne({ estado: true })
+            .populate({
+                path: "subprocesos.actividades.idParticipante",
+                select: "nombre"
+            })
+            .populate({
+                path: "subprocesos.actividades.instrumentos.idInstrumento",
+                select: "codigo nombre archivo version"
+            });
+
+        if (!planificacionVigente) {
+            return res.status(404).send({ message: "No se encontró una planificación vigente" });
+        }
+
+        const subproceso = planificacionVigente.subprocesos.id(id);
+        if (!subproceso) {
+            return res.status(404).send({ message: "No se encontró el subproceso especificado" });
+        }
+
+        // Calculo del estado en base a las fechas
+        const hoy = new Date().toISOString().split("T")[0];
+        const fechaInicioSP = subproceso.fechaInicio.toISOString().split("T")[0];
+        const fechaFinSP = subproceso.fechaFin.toISOString().split("T")[0];
+
+        let estadoCalculado = "proximo";
+
+        if (hoy > fechaFinSP) {
+            estadoCalculado = "finalizado";
+        } else if (hoy >= fechaInicioSP && hoy <= fechaFinSP) {
+            estadoCalculado = "en_proceso";
+        } else if (hoy < fechaInicioSP) {
+            estadoCalculado = "proximo";
+        }
+
+        // Cálculo de días restantes para fecha fin
+        const fechaHoyDate = new Date(hoy);
+        const fechaFinDate = new Date(fechaFinSP);
+
+        // Restamos los milisegundos y convertimos a días
+        const diferenciaMilisegundos = fechaFinDate.getTime() - fechaHoyDate.getTime();
+        const diasRestantes = Math.ceil(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
+
+        // Calculamos el porcentaje de avance del subproceso
+        const actividades = subproceso.actividades || [];
+        const actividadesTotales = actividades.length;
+
+        const actividadesCompletadas = actividades.filter(actividad => {
+            if (!actividad.fechaFin) return false;
+            const fechaFinActividad = new Date(actividad.fechaFin).toISOString().split("T")[0];
+            return hoy > fechaFinActividad;
+        }).length;
+
+        const porcentajeCompletado = actividadesTotales > 0 ? Math.round((actividadesCompletadas / actividadesTotales) * 100) : 0;
+
+        // Convertimos a un objeto JS plano
+        const subprocesoData = subproceso.toObject();
+
+        // Asignamos las propiedades calculadas al nuevo objeto
+        subprocesoData.porcentajeCompletado = porcentajeCompletado;
+        subprocesoData.estadoCalculado = estadoCalculado;
+        subprocesoData.actividadesCompletadas = actividadesCompletadas;
+        subprocesoData.actividadesTotales = actividadesTotales;
+        subprocesoData.diasRestantes = diasRestantes >= 0 ? diasRestantes : 0;
+
+        res.status(200).send({
+            message: "Subproceso específico obtenido exitosamente",
+            data: subprocesoData
+        });
+    } catch (e) {
+        console.error("No se pudo obtener el subproceso específico: ", e.name);
+        res.status(500).send({ message: "Error interno del servidor" });
+    }
+}
+
 export default {
     registrarPlanificacion,
     obtenerPlanificaciones,
@@ -558,5 +636,6 @@ export default {
     obtenerSubprocesoActual,
     obtenerActividadPorId,
     obtenerSubprocesosPlanificacionVigente,
-    obtenerCodigoPAO
+    obtenerCodigoPAO,
+    obtenerSubprocesoEspecificoPlanificacion
 }

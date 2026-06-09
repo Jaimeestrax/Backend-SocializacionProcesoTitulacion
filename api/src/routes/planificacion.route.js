@@ -19,5 +19,6 @@ planificacionRouter.get('/obtener-subproceso-actual', PlanificacionController.ob
 planificacionRouter.get('/obtener-actividad-por-id/:id', PlanificacionController.obtenerActividadPorId);
 planificacionRouter.get('/obtener-subprocesos-planificacion-vigente', PlanificacionController.obtenerSubprocesosPlanificacionVigente);
 planificacionRouter.get('/obtener-codigo-pao', PlanificacionController.obtenerCodigoPAO);
+planificacionRouter.get('/obtener-subproceso-especifico-planificacion/:id', PlanificacionController.obtenerSubprocesoEspecificoPlanificacion);
 
 export default planificacionRouter;
