@@ -472,12 +472,73 @@ async function obtenerSubprocesosPlanificacionVigente(req, res) {
             return res.status(404).send({ message: "No se encontró una planificación vigente" });
         }
 
+        // Obtener la fecha de hoy en formato 'YYYY-MM-DD' para comparar cadenas de forma segura
+        const hoy = new Date().toISOString().split("T")[0];
+
+        // Mapeamos los subprocesos para añadirles el estado calculado -> ayuda a filtrar en calendarización
+        const subprocesosConEstado = planificacionVigente.subprocesos.map(subproceso => {
+            // Convertimos el documento de Mongoose a objeto plano para poder manipularlo libremente
+            const spObj = subproceso.toObject();
+
+            // Formateamos las fechas del subproceso
+            const fechaInicioSP = subproceso.fechaInicio.toISOString().split("T")[0];
+            const fechaFinSP = subproceso.fechaFin.toISOString().split("T")[0];
+
+            let estadoCalculado = "proximo";
+
+            // Calculo del estado en base a las fechas
+            if (hoy > fechaFinSP) {
+                estadoCalculado = "finalizado";
+            } else if (hoy >= fechaInicioSP && hoy <= fechaFinSP) {
+                estadoCalculado = "en_proceso";
+            } else if (hoy < fechaInicioSP) {
+                estadoCalculado = "proximo";
+            }
+
+            // Cantidad de actividades finalizadas -> hoy > fechaFin de la actividad
+            const actividades = spObj.actividades || [];
+
+            const actividadesCompletadas = actividades.filter(actividad => {
+                if (!actividad.fechaFin) return false;
+                const fechaFinActividad = new Date(actividad.fechaFin).toISOString().split("T")[0];
+                return hoy > fechaFinActividad;
+            }).length;
+
+            // Total de actividades en este subproceso
+            const actividadesTotales = actividades.length;
+
+            // Inyectamos la nueva propiedad al objeto plano del subproceso
+            spObj.estadoCalculado = estadoCalculado;
+            spObj.actividadesCompletadas = actividadesCompletadas;
+            spObj.actividadesTotales = actividadesTotales;
+
+            return spObj;
+        });
+
         res.status(200).send({
             message: "Subprocesos de la planificación vigente obtenidos exitosamente",
-            data: planificacionVigente.subprocesos
+            data: subprocesosConEstado
         });
     } catch (e) {
         console.error("No se pudo obtener los subprocesos de la planificación: ", e.name);
+        res.status(500).send({ message: "Error interno del servidor" });
+    }
+}
+
+async function obtenerCodigoPAO(req, res) {
+    try {
+        const planificacionVigente = await Planificacion.findOne({ estado: true }).select("periodo");
+
+        if (!planificacionVigente) {
+            return res.status(404).send({ message: "No se encontró una planificación vigente" });
+        }
+
+        res.status(200).send({
+            message: "Código PAO obtenido exitosamente",
+            data: planificacionVigente.periodo
+        });
+    } catch (e) {
+        console.error("No se pudo obtener el código del PAO actual: ", e.name);
         res.status(500).send({ message: "Error interno del servidor" });
     }
 }
@@ -496,5 +557,6 @@ export default {
     obtenerProximasActividades,
     obtenerSubprocesoActual,
     obtenerActividadPorId,
-    obtenerSubprocesosPlanificacionVigente
+    obtenerSubprocesosPlanificacionVigente,
+    obtenerCodigoPAO
 }
