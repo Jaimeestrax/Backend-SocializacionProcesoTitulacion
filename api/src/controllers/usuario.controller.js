@@ -240,6 +240,26 @@ async function contarUsuariosActivos(req, res) {
     }
 }
 
+async function listarUsuariosActivos(req, res) {
+    try {
+        const usuariosEncontrados = await Usuario
+            .find({ estado: 1 })
+            .populate('idCarrera', 'nombre');
+
+        if (usuariosEncontrados.length === 0) {
+            return res.status(404).send({ message: 'No se encontraron usuarios activos' });
+        }
+
+        res.status(200).send({
+            message: 'Usuarios activos obtenidos exitosamente',
+            data: usuariosEncontrados
+        });
+    } catch (error) {
+        console.error('No se pudo obtener el listado de usuarios activos:', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
 const UsuarioController = {
     registrarUsuario,
     obtenerUsuarioAutenticado,
@@ -247,7 +267,8 @@ const UsuarioController = {
     actualizarUsuario,
     actualizarEstadoUsuario,
     obtenerUsuarioPorId,
-    contarUsuariosActivos
+    contarUsuariosActivos,
+    listarUsuariosActivos
 }
 
 export default UsuarioController;

@@ -43,7 +43,7 @@ async function obtenerFaqs(req, res) {
         const faqsEncontradas = await Faq.paginate(filtro, options);
 
         if (faqsEncontradas.docs.length === 0) {
-            return res.status(404).send({ message: 'No se encontraron FAQs' });
+            return res.status(404).send({ message: 'No se encontraron preguntas frecuentes' });
         }
 
         res.status(200).send({
@@ -51,7 +51,7 @@ async function obtenerFaqs(req, res) {
             data: faqsEncontradas
         });
     } catch (error) {
-        console.log('No se pudo obtener las FAQs', error.name);
+        console.log('No se pudo obtener las preguntas frecuentes', error.name);
         res.status(500).send({ message: 'Error interno del servidor' });
     }
 }
