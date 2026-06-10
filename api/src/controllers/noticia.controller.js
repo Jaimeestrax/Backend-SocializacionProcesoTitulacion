@@ -127,27 +127,6 @@ async function obtenerNoticias(req, res) {
     }
 }
 
-async function actualizarEstadoNoticia(req, res) {
-    try {
-        const { id } = req.params;
-        const { estado } = req.body;
-
-        if (!id || !estado) {
-            return res.status(400).send({ message: 'No se ha proporcionado la información de la noticia' });
-        }
-
-        const noticiaActualizada = await Noticia.findByIdAndUpdate(id, { estado }, { new: true });
-        if (noticiaActualizada) {
-            res.status(200).send({ message: 'Noticia actualizada exitosamente' });
-        } else {
-            res.status(404).send({ message: 'No se encontro la noticia' });
-        }
-    } catch (error) {
-        console.log('No se pudo actualizar el estado de la noticia', error.name);
-        res.status(500).send({ message: 'Error interno del servidor' });
-    }
-}
-
 async function obtenerNoticiaPorId(req, res) {
     try {
         const { id } = req.params;
@@ -183,13 +162,37 @@ async function eliminarNoticia(req, res) {
     }
 }
 
+async function obtenerNoticiasPublico(req, res) {
+    try {
+        // Noticias del periodo actual
+        const planificacionActual = await Planificacion.findOne({ estado: true });
+
+        if (!planificacionActual) {
+            return res.status(404).send({ message: 'No se encontró la planificación vigente' });
+        }
+
+        const noticiasEncontradas = await Noticia.find({ idPlanificacion: planificacionActual._id })
+            .sort({ _id: -1 })
+            .populate('idEncargadoGenerar', 'nombres apellidos');
+
+        res.status(200).send({
+            message: 'Noticias obtenidas exitosamente',
+            data: noticiasEncontradas
+        });
+
+    } catch (error) {
+        console.log('No se pudo obtener las noticias del periodo vigente', error.message);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
 const NoticiaController = {
     registrarNoticia,
     actualizarNoticia,
     obtenerNoticias,
-    actualizarEstadoNoticia,
     obtenerNoticiaPorId,
-    eliminarNoticia
+    eliminarNoticia,
+    obtenerNoticiasPublico
 }
 
 export default NoticiaController;

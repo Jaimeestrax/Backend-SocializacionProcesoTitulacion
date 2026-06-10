@@ -566,7 +566,7 @@ async function obtenerSubprocesoEspecificoPlanificacion(req, res) {
             return res.status(404).send({ message: "No se encontró el subproceso especificado" });
         }
 
-        // Calculo del estado en base a las fechas
+        // Calculo del estado del subproceso en base a las fechas
         const hoy = new Date().toISOString().split("T")[0];
         const fechaInicioSP = subproceso.fechaInicio.toISOString().split("T")[0];
         const fechaFinSP = subproceso.fechaFin.toISOString().split("T")[0];
@@ -589,22 +589,44 @@ async function obtenerSubprocesoEspecificoPlanificacion(req, res) {
         const diferenciaMilisegundos = fechaFinDate.getTime() - fechaHoyDate.getTime();
         const diasRestantes = Math.ceil(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
 
+        // Cálculo de estado por actividad
+        const actividadesOriginales = subproceso.actividades || [];
+        const actividadesTotales = actividadesOriginales.length;
+        let actividadesCompletadas = 0;
+
+        const actividadesProcesadas = actividadesOriginales.map(actividad => {
+            // Pasamos a objeto plano
+            const actData = actividad.toObject();
+
+            if (actData.fechaInicio && actData.fechaFin) {
+                // Fechas de la actividad
+                const fInicioAct = new Date(actData.fechaInicio).toISOString().split("T")[0];
+                const fFinAct = new Date(actData.fechaFin).toISOString().split("T")[0];
+
+                if (hoy > fFinAct) {
+                    actData.estadoCalculado = "finalizado";
+                    actividadesCompletadas++; // Suma al contador global si ya finalizo
+                } else if (hoy >= fInicioAct && hoy <= fFinAct) {
+                    actData.estadoCalculado = "en_proceso";
+                } else {
+                    actData.estadoCalculado = "proximo";
+                }
+            } else {
+                // Fallback por seguridad si alguna actividad no tiene fechas registradas
+                actData.estadoCalculado = "proximo";
+            }
+
+            return actData;
+        });
+
         // Calculamos el porcentaje de avance del subproceso
-        const actividades = subproceso.actividades || [];
-        const actividadesTotales = actividades.length;
-
-        const actividadesCompletadas = actividades.filter(actividad => {
-            if (!actividad.fechaFin) return false;
-            const fechaFinActividad = new Date(actividad.fechaFin).toISOString().split("T")[0];
-            return hoy > fechaFinActividad;
-        }).length;
-
         const porcentajeCompletado = actividadesTotales > 0 ? Math.round((actividadesCompletadas / actividadesTotales) * 100) : 0;
 
-        // Convertimos a un objeto JS plano
+        // Convertimos a un objeto plano
         const subprocesoData = subproceso.toObject();
 
         // Asignamos las propiedades calculadas al nuevo objeto
+        subprocesoData.actividades = actividadesProcesadas; // Reemplzamos actividades originales con las procesadas
         subprocesoData.porcentajeCompletado = porcentajeCompletado;
         subprocesoData.estadoCalculado = estadoCalculado;
         subprocesoData.actividadesCompletadas = actividadesCompletadas;
