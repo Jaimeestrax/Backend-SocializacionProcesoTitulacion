@@ -19,6 +19,11 @@ const noticiaSchema = new mongoose.Schema({
         ref: 'Planificacion',
         required: true
     },
+    estado: {
+        type: Boolean,
+        required: true,
+        default: true
+    },
     imagen: {
         type: String,
         required: false

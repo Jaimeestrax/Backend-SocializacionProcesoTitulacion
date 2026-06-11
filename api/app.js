@@ -22,6 +22,7 @@ import planificacionRouter from './src/routes/planificacion.route.js';
 import noticiaRouter from './src/routes/noticia.route.js';
 import carreraRouter from './src/routes/carrera.route.js';
 import faqRouter from './src/routes/faq.route.js';
+import chatbotRouter from './src/routes/chatbot.route.js';
 
 // Conexión a la base de datos
 await connectDB();
@@ -58,6 +59,7 @@ app.use('/api', planificacionRouter);
 app.use('/api', noticiaRouter);
 app.use('/api', carreraRouter);
 app.use('/api', faqRouter);
+app.use('/api', chatbotRouter);
 
 // Servir archivos estaticos
 app.use('/uploads', express.static(path.resolve('uploads')));

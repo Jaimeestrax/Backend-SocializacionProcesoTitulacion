@@ -108,7 +108,7 @@ async function obtenerNoticias(req, res) {
             return res.status(404).send({ message: 'No se encontró la planificación vigente' });
         }
 
-        let filtro = { idPlanificacion: planificacionActual._id };
+        let filtro = { idPlanificacion: planificacionActual._id, estado: true };
 
         if (req.body.palabra && req.body.palabra.trim() !== "") {
             filtro.titulo = { $regex: req.body.palabra.trim(), $options: "i" };
@@ -171,7 +171,7 @@ async function obtenerNoticiasPublico(req, res) {
             return res.status(404).send({ message: 'No se encontró la planificación vigente' });
         }
 
-        const noticiasEncontradas = await Noticia.find({ idPlanificacion: planificacionActual._id })
+        const noticiasEncontradas = await Noticia.find({ idPlanificacion: planificacionActual._id, estado: true })
             .sort({ _id: -1 })
             .populate('idEncargadoGenerar', 'nombres apellidos');
 

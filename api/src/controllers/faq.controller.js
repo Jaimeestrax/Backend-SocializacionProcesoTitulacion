@@ -2,23 +2,22 @@ import Faq from "../schemas/faq.model.js";
 
 async function registrarFaq(req, res) {
     try {
-        const { pregunta, respuesta, keywords } = req.body;
+        const { pregunta, respuesta } = req.body;
 
-        if (!pregunta || !respuesta || !keywords || keywords.length === 0) {
+        if (!pregunta || !respuesta) {
             return res.status(400).send({ message: 'No se ha proporcionado toda la información de la FAQ' });
         }
 
         const nuevaFaq = new Faq({
             pregunta,
-            respuesta,
-            keywords
+            respuesta
         });
 
         await nuevaFaq.save();
 
-        res.status(201).send({ message: 'FAQ registrada exitosamente' });
+        res.status(201).send({ message: 'Pregunta frecuente registrada exitosamente' });
     } catch (error) {
-        console.error('No se pudo registrar la FAQ', error.name);
+        console.error('No se pudo registrar la pregunta frecuente', error.name);
         res.status(500).send({ message: 'Error interno del servidor' });
     }
 }
@@ -34,10 +33,7 @@ async function obtenerFaqs(req, res) {
         let filtro = {};
 
         if (req.body.palabra && req.body.palabra.trim() !== "") {
-            filtro.$or = [
-                { pregunta: { $regex: req.body.palabra.trim(), $options: "i" } },
-                { keywords: { $regex: req.body.palabra.trim(), $options: "i" } }
-            ];
+            filtro.pregunta = { $regex: req.body.palabra.trim(), $options: "i" }
         }
 
         const faqsEncontradas = await Faq.paginate(filtro, options);
@@ -61,14 +57,14 @@ async function obtenerFaqPorId(req, res) {
         const { id } = req.params;
         const faqEncontrada = await Faq.findById(id);
         if (!faqEncontrada) {
-            return res.status(404).send({ message: 'No se encontró la FAQ' });
+            return res.status(404).send({ message: 'No se encontró la pregunta frecuente' });
         }
         res.status(200).send({
-            message: 'FAQ obtenida exitosamente',
+            message: 'Pregunta frecuente obtenida exitosamente',
             data: faqEncontrada
         });
     } catch (error) {
-        console.error('No se pudo obtener la FAQ', error.name);
+        console.error('No se pudo obtener la pregunta frecuente', error.name);
         res.status(500).send({ message: 'Error interno del servidor' });
     }
 }
@@ -76,13 +72,13 @@ async function obtenerFaqPorId(req, res) {
 async function actualizarFaq(req, res) {
     try {
         const { id } = req.params;
-        const { pregunta, respuesta, keywords } = req.body;
+        const { pregunta, respuesta } = req.body;
 
-        if (!id || !pregunta || !respuesta || !keywords || keywords.length === 0) {
-            return res.status(400).send({ message: 'No se ha proporcionado toda la información de la FAQ' });
+        if (!id || !pregunta || !respuesta) {
+            return res.status(400).send({ message: 'No se ha proporcionado toda la información de la pregunta frecuente' });
         }
 
-        const faqActualizada = await Faq.findByIdAndUpdate(id, { pregunta, respuesta, keywords }, { new: true });
+        const faqActualizada = await Faq.findByIdAndUpdate(id, { pregunta, respuesta }, { new: true });
 
         if (faqActualizada) {
             res.status(200).send({ message: 'Pregunta frecuente actualizada exitosamente' });
