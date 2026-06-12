@@ -18,6 +18,12 @@ async function registrarFaq(req, res) {
         res.status(201).send({ message: 'Pregunta frecuente registrada exitosamente' });
     } catch (error) {
         console.error('No se pudo registrar la pregunta frecuente', error.name);
+        if (error.code === 11000) {
+            const campo = Object.keys(error.keyPattern)[0];
+            if (campo === 'pregunta') {
+                return res.status(409).send({ message: 'La pregunta ya se encuentra registrada.' });
+            }
+        }
         res.status(500).send({ message: 'Error interno del servidor' });
     }
 }
@@ -87,6 +93,12 @@ async function actualizarFaq(req, res) {
         }
     } catch (error) {
         console.error('No se pudo actualizar la pregunta frecuente', error.name);
+        if (error.code === 11000) {
+            const campo = Object.keys(error.keyPattern)[0];
+            if (campo === 'pregunta') {
+                return res.status(409).send({ message: 'La pregunta ya se encuentra registrada.' });
+            }
+        }
         res.status(500).send({ message: 'Error interno del servidor' });
     }
 }

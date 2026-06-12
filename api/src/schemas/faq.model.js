@@ -4,7 +4,8 @@ import mongoosePaginate from "mongoose-paginate-v2";
 const faqSchema = new mongoose.Schema({
     pregunta: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     respuesta: {
         type: String,

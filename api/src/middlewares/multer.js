@@ -16,7 +16,11 @@ const allowedMimeFiles = new Set([
 
 // cb -> función callback (error, resultado)
 const fileFilter = (req, file, cb) => {
-    if (allowedMimeFiles.has(file.mimetype)) {
+    // Validar tambien extensión
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowedExts = new Set(['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png']);
+
+    if (allowedMimeFiles.has(file.mimetype) && allowedExts.has(ext)) {
         // accept
         cb(null, true);
     } else {

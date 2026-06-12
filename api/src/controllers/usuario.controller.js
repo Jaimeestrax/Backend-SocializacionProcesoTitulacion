@@ -46,19 +46,23 @@ async function registrarUsuario(req, res) {
 
     } catch (error) {
         console.error('No se pudo registrar el usuario: ', error.name); // Evita exponer información sensible
+        // Errores de clave duplicada
+        if (error.code === 11000) {
+            const campo = Object.keys(error.keyPattern)[0];
+            if (campo === 'usuario') {
+                return res.status(409).send({ message: 'El usuario ya existe' });
+            }
+            if (campo === 'correo') {
+                return res.status(409).send({ message: 'El correo ya existe' });
+            }
+            return res.status(409).send({ message: 'Existe un campo duplicado' });
+        }
+        // Errores de validación del esquema
         if (error.name === 'ValidationError') {
             const errores = error.errors;
             // Validación del match del correo
             if (errores.correo && errores.correo.kind === 'match') {
-                return res.status(400).send({ message: 'El correo no cumple con el formato institucional' })
-            }
-            // Validación de usuario único
-            if (errores.usuario && errores.usuario.kind === 'unique') {
-                return res.status(400).send({ message: 'El usuario ya existe' })
-            }
-            // Validación de correo único
-            if (errores.correo && errores.correo.kind === 'unique') {
-                return res.status(400).send({ message: 'El correo ya existe' })
+                return res.status(400).send({ message: 'El correo no cumple con el formato institucional' });
             }
         }
         res.status(500).send({ message: 'Error interno del servidor' });
@@ -163,19 +167,23 @@ async function actualizarUsuario(req, res) {
         if (req.file) {
             eliminarArchivoFisico(req.file.path);
         }
+        // Errores de clave duplicada
+        if (error.code === 11000) {
+            const campo = Object.keys(error.keyPattern)[0];
+            if (campo === 'usuario') {
+                return res.status(409).send({ message: 'El usuario ya existe' });
+            }
+            if (campo === 'correo') {
+                return res.status(409).send({ message: 'El correo ya existe' });
+            }
+            return res.status(409).send({ message: 'Existe un campo duplicado' });
+        }
+        // Errores de validación del esquema
         if (error.name === 'ValidationError') {
             const errores = error.errors;
             // Validación del match del correo
             if (errores.correo && errores.correo.kind === 'match') {
-                return res.status(400).send({ message: 'El correo no cumple con el formato institucional' })
-            }
-            // Validación de usuario único
-            if (errores.usuario && errores.usuario.kind === 'unique') {
-                return res.status(400).send({ message: 'El usuario ya existe' })
-            }
-            // Validación de correo único
-            if (errores.correo && errores.correo.kind === 'unique') {
-                return res.status(400).send({ message: 'El correo ya existe' })
+                return res.status(400).send({ message: 'El correo no cumple con el formato institucional' });
             }
         }
         res.status(500).send({ message: 'Error interno del servidor' });
