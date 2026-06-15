@@ -39,7 +39,8 @@ async function obtenerRoles(req, res) {
     try {
         const options = {
             page: req.body.pagina || 1,
-            limit: req.body.limite || 10
+            limit: req.body.limite || 10,
+            sort: { _id: -1 }
         };
 
         const rolesEncontrados = await Rol.paginate({ estado: { $ne: 2 } }, options); // Activos e inactivos - no eliminados (estado 2)

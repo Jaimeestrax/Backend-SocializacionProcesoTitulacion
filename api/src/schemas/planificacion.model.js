@@ -23,6 +23,11 @@ const planificacionSchema = new mongoose.Schema({
         required: true,
         default: true
     },
+    // Badge del proceso general
+    imagenProceso: {
+        type: String,
+        required: true
+    },
     // Snapshot operativo
     subprocesos: [{
         identificador: {

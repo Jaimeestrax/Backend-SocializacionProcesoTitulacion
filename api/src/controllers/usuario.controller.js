@@ -87,6 +87,7 @@ async function obtenerUsuarios(req, res) {
         const options = {
             page: req.body.pagina || 1,
             limit: req.body.limite || 10,
+            sort: { _id: -1 },
             populate: [
                 { path: 'idRol', select: 'nombre estado' },
                 { path: 'idCargo', select: 'nombre estado' },

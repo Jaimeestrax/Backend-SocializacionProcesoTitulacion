@@ -117,12 +117,27 @@ async function eliminarFaq(req, res) {
     }
 }
 
+async function contarFaqs(req, res) {
+    try {
+        const faqsEncontradas = await Faq.countDocuments({});
+
+        res.status(200).send({
+            message: 'Total de preguntas frecuentes obtenido exitosamente',
+            data: faqsEncontradas
+        });
+    } catch (error) {
+        console.error('No se pudo obtener el total de preguntas frecuentes', error.name);
+        res.status(500).send({ message: 'Error interno del servidor' });
+    }
+}
+
 const FaqController = {
     registrarFaq,
     obtenerFaqs,
     obtenerFaqPorId,
     actualizarFaq,
-    eliminarFaq
+    eliminarFaq,
+    contarFaqs
 }
 
 export default FaqController;

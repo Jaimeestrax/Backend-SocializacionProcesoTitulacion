@@ -1,7 +1,7 @@
 import Faq from "../schemas/faq.model.js";
 
 async function obtenerPreguntasFrecuentes() {
-    const faqsEncontradas = await Faq.find();
+    const faqsEncontradas = await Faq.find().sort({ _id: -1 }).limit(5);
 
     if (faqsEncontradas.length === 0) {
         throw new Error("No se encontraron preguntas frecuentes");

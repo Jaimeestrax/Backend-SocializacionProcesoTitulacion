@@ -1,13 +1,24 @@
 import Planificacion from "../schemas/planificacion.model.js";
 import Noticia from "../schemas/noticia.model.js";
+import eliminarArchivoFisico from "../utils/eliminarArchivo.js";
 
 async function registrarPlanificacion(req, res) {
     try {
         const { periodo, fechaInicio, fechaFin, subprocesos, idEncargadoGenerar } = req.body;
+        // Parseamos lo que llega
+        subprocesos = JSON.parse(subprocesos);
 
         // Información general de la planificación
         if (!periodo || !fechaInicio || !fechaFin || !subprocesos || subprocesos.length === 0 || !idEncargadoGenerar) {
+            if (req.file) {
+                eliminarArchivoFisico(req.file.path);
+            }
             return res.status(400).send({ message: 'No se ha proporcionado toda la información de la planificación' });
+        }
+
+        // Verificar que venga imagen del proceso macro
+        if (!req.file) {
+            return res.status(400).send({ message: 'No se ha proporcionado la imagen representativa del proceso' });
         }
 
         // Validar subprocesos relacionados a la planificación
@@ -15,6 +26,9 @@ async function registrarPlanificacion(req, res) {
             const { identificador, nombre, descripcion, fechaInicio, fechaFin } = subproceso;
 
             if (!identificador || !nombre || !descripcion || !fechaInicio || !fechaFin) {
+                if (req.file) {
+                    eliminarArchivoFisico(req.file.path);
+                }
                 return res.status(400).send({ message: `El subproceso "${nombre || 'sin nombre'}" tiene datos incompletos` });
             }
 
@@ -22,6 +36,9 @@ async function registrarPlanificacion(req, res) {
                 const { nombre, descripcion, fechaInicio, fechaFin, idParticipante } = actividad;
 
                 if (!nombre || !descripcion || !fechaInicio || !fechaFin || !idParticipante) {
+                    if (req.file) {
+                        eliminarArchivoFisico(req.file.path);
+                    }
                     return res.status(400).send({ message: `La actividad "${nombre || 'sin nombre'}" tiene datos incompletos` });
                 }
 
@@ -29,6 +46,9 @@ async function registrarPlanificacion(req, res) {
                     const { idInstrumento, identificador } = instrumento;
 
                     if (!idInstrumento || !identificador) {
+                        if (req.file) {
+                            eliminarArchivoFisico(req.file.path);
+                        }
                         return res.status(400).send({ message: `El instrumento "${idInstrumento || 'sin nombre'}" tiene datos incompletos` });
                     }
                 }
@@ -41,6 +61,7 @@ async function registrarPlanificacion(req, res) {
             fechaInicio,
             fechaFin,
             subprocesos,
+            imagenProceso: req.file.path.replace(/\\/g, '/'),
             idEncargadoGenerar
         });
 
@@ -55,6 +76,9 @@ async function registrarPlanificacion(req, res) {
         res.status(201).send({ message: 'Planificación registrada exitosamente' });
     } catch (error) {
         console.error("No se pudo registrar la planificación: ", error.name);
+        if (req.file) {
+            eliminarArchivoFisico(req.file.path);
+        }
         res.status(500).send({ message: "Error interno del servidor" });
     }
 }
@@ -64,6 +88,7 @@ async function obtenerPlanificaciones(req, res) {
         const options = {
             page: req.body.pagina || 1,
             limit: req.body.limite || 10,
+            sort: { _id: -1 },
             populate: [
                 { path: 'subprocesos.actividades.idParticipante', select: 'nombre' },
                 { path: 'subprocesos.actividades.instrumentos.idInstrumento', select: 'codigo nombre archivo version' }
@@ -98,6 +123,8 @@ async function actualizarPlanificacion(req, res) {
         const { id } = req.params;
 
         const datosActualizar = { ...req.body };
+        // Parseamos lo que llega
+        datosActualizar.subprocesos = JSON.parse(datosActualizar.subprocesos);
 
         // Validación general
         if (
@@ -108,7 +135,14 @@ async function actualizarPlanificacion(req, res) {
             datosActualizar.subprocesos.length === 0 ||
             !datosActualizar.idEncargadoActualizar
         ) {
+            if (req.file) {
+                eliminarArchivoFisico(req.file.path);
+            }
             return res.status(400).send({ message: "No se ha proporcionado toda la información de la planificación" });
+        }
+
+        if (req.file) {
+            datosActualizar.imagenProceso = req.file.path.replace(/\\/g, '/');
         }
 
         // Validación de subprocesos
@@ -120,6 +154,9 @@ async function actualizarPlanificacion(req, res) {
                 !subproceso.fechaInicio ||
                 !subproceso.fechaFin
             ) {
+                if (req.file) {
+                    eliminarArchivoFisico(req.file.path);
+                }
                 return res.status(400).send({ message: `El subproceso "${subproceso.nombre || 'sin nombre'}" tiene datos incompletos` });
             }
 
@@ -132,6 +169,9 @@ async function actualizarPlanificacion(req, res) {
                     !actividad.fechaFin ||
                     !actividad.idParticipante
                 ) {
+                    if (req.file) {
+                        eliminarArchivoFisico(req.file.path);
+                    }
                     return res.status(400).send({ message: `La actividad "${actividad.nombre || 'sin nombre'}" tiene datos incompletos` });
                 }
 
@@ -141,6 +181,9 @@ async function actualizarPlanificacion(req, res) {
                         !instrumento.idInstrumento ||
                         !instrumento.identificador
                     ) {
+                        if (req.file) {
+                            eliminarArchivoFisico(req.file.path);
+                        }
                         return res.status(400).send({ message: `Un instrumento de la actividad "${actividad.nombre}" tiene datos incompletos` });
                     }
                 }
@@ -152,6 +195,9 @@ async function actualizarPlanificacion(req, res) {
         const planificacionActualizada = await Planificacion.findByIdAndUpdate(id, datosActualizar, { new: true });
 
         if (!planificacionActualizada) {
+            if (req.file) {
+                eliminarArchivoFisico(req.file.path);
+            }
             return res.status(404).send({ message: "No se encontró la planificación" });
         }
 
@@ -161,6 +207,9 @@ async function actualizarPlanificacion(req, res) {
         });
     } catch (error) {
         console.error("No se pudo actualizar la planificación: ", error.name);
+        if (req.file) {
+            eliminarArchivoFisico(req.file.path);
+        }
         res.status(500).send({ message: "Error interno del servidor" });
     }
 }
@@ -643,12 +692,28 @@ async function obtenerSubprocesoEspecificoPlanificacion(req, res) {
     }
 }
 
+async function contarPlanificacionesTotales(req, res) {
+    try {
+        const planificacionesEncontradas = await Planificacion.countDocuments({});
+
+        res.status(200).send({
+            message: "Planificaciones totales obtenidas exitosamente",
+            data: planificacionesEncontradas
+        });
+    } catch (e) {
+        console.error("No se pudo obtener el conteo de planificaciones: ", e.name);
+        res.status(500).send({ message: "Error interno del servidor" });
+    }
+}
+
+
 export default {
     registrarPlanificacion,
     obtenerPlanificaciones,
     actualizarPlanificacion,
     actualizarEstadoPlanificacion,
     obtenerPlanificacionPorId,
+    contarPlanificacionesTotales,
 
     // Consultas públicas
     obtenerPlanificacionVigente,

@@ -9,5 +9,6 @@ faqRouter.post('/obtener-faqs', FaqController.obtenerFaqs);
 faqRouter.get('/obtener-faq-por-id/:id', ensureAuth, FaqController.obtenerFaqPorId);
 faqRouter.put('/actualizar-faq/:id', ensureAuth, FaqController.actualizarFaq);
 faqRouter.delete('/eliminar-faq/:id', ensureAuth, FaqController.eliminarFaq);
+faqRouter.get('/contar-faqs', ensureAuth, FaqController.contarFaqs);
 
 export default faqRouter;

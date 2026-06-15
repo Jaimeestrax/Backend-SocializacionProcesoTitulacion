@@ -1,5 +1,0 @@
-En mongodb shell:
-
-1. Creación de cargos:
-db.cargos.insertMany([{nombre_cargo: "Comisión de Titulación"}, {nombre_cargo: "Presidente Comisión"}, {nombre_cargo: "Miembro Comisión"}, {nombre_cargo: "Tutor"}, {nombre_cargo: "Estudiante"}, {nombre_cargo: "Secretaria"}])
-

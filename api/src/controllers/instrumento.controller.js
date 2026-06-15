@@ -163,9 +163,6 @@ async function actualizarInstrumento(req, res) {
             if (instrumentoActualizado) {
                 res.status(200).send({ message: 'Instrumento actualizado exitosamente' });
             } else {
-                if (req.file) {
-                    eliminarArchivoFisico(req.file.path);
-                }
                 res.status(404).send({ message: 'No se ha podido actualizar el instrumento' });
             }
         }

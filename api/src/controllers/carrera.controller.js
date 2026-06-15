@@ -48,7 +48,8 @@ async function obtenerCarreras(req, res) {
     try {
         const options = {
             page: req.body.pagina || 1,
-            limit: req.body.limite || 10
+            limit: req.body.limite || 10,
+            sort: { _id: -1 }
         };
 
         let filtro = { estado: { $ne: 2 } };

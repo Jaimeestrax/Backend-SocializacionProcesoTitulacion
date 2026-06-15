@@ -59,7 +59,8 @@ async function obtenerCargos(req, res) {
     try {
         const options = {
             page: req.body.pagina || 1,
-            limit: req.body.limite || 10
+            limit: req.body.limite || 10,
+            sort: { _id: -1 } // Registros más recientes primero
         };
 
         // Filtro de busqueda
